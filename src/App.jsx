@@ -13,7 +13,7 @@ import CancellationRefunds from "./Pages/CancellationRefunds";
 import ContactUs from "./Pages/ContactUs";
 import PrivacyPolicy from "./Pages/PrivacyPolicy";
 import ShippingPolicy from "./Pages/ShippingPolicy";
-import TermsAndConditions from "./Pages/TermsandConditions";
+import TermsAndConditions from "./Pages/TermsAndConditions";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -7,6 +7,13 @@ import BuyerDashboard from "./Components/BuyerDashboard";
 import MakerDashboard from "./Components/MakerDashboard";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import SubscriptionPage from "./Components/SubscriptionPage";
+
+import CancellationRefunds from "./Pages/CancellationRefunds";
+import ContactUs from "./Pages/ContactUs";
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
+import ShippingPolicy from "./Pages/ShippingPolicy";
+import TermsAndConditions from "./Pages/TermsandConditions";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -60,7 +67,7 @@ function App() {
 
   return (
     <Routes>
-      <Route
+      {/* <Route
         path="/"
         element={
           isAuthenticated ? (
@@ -73,7 +80,8 @@ function App() {
             <LandingPage />
           )
         }
-      />
+      /> */}
+      <Route path="/" element={<LandingPage />} />
       <Route
         path="/login"
         element={
@@ -132,6 +140,26 @@ function App() {
           )
         }
       />
+
+      <Route
+        path="/subscription"
+        element={
+          isAuthenticated ? (
+            <SubscriptionPage
+              setIsAuthenticated={setIsAuthenticated}
+              setUserRole={setUserRole}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route path="/terms" element={<TermsAndConditions />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/shipping" element={<ShippingPolicy />} />
+      <Route path="/contact" element={<ContactUs />} />
+      <Route path="/cancellation" element={<CancellationRefunds />} />
     </Routes>
   );
 }

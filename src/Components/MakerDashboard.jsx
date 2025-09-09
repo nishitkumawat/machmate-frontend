@@ -4,13 +4,14 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 function MakerDashboard({ setIsAuthenticated, setUserRole }) {
-  const [showCompanyForm, setShowCompanyForm] = useState(true); // Show form for first-time users
+  const [showCompanyForm, setShowCompanyForm] = useState(false);
   const [showQuotationDialog, setShowQuotationDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [quotationData, setQuotationData] = useState({
     amount: "",
-    percentageChange: 0,
+    description: "",
     completionDate: "",
+    pdfUrl: "", // Added pdfUrl field
   });
   const [filters, setFilters] = useState({
     price: "",
@@ -20,7 +21,9 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openProjects, setOpenProjects] = useState([]);
   const [activeSection, setActiveSection] = useState("dashboard");
-  // Add this near the top of your component, after the state declarations
+  const [isLoading, setIsLoading] = useState(true);
+  const [userSubscription, setUserSubscription] = useState(null);
+
   const specializationsList = [
     "CNC Machining",
     "3D Printing",
@@ -35,12 +38,12 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
 
-  // Fetch open projects on component mount
   useEffect(() => {
     axios.get("http://localhost:8000/csrf/", { withCredentials: true });
     fetchOpenProjects();
+    checkCompanyProfile();
+    fetchUserSubscription();
 
-    // Set up scroll spy
     const handleScroll = () => {
       const sections = document.querySelectorAll("section");
       let currentSection = "dashboard";
@@ -58,6 +61,79 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Credit checking functions
+  const checkCredits = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/subscriptions/check-credits/",
+        {
+          withCredentials: true,
+          headers: { "X-CSRFToken": csrftoken },
+        }
+      );
+      return response.data.has_credits;
+    } catch (error) {
+      console.error("Credit check error:", error);
+      return false;
+    }
+  };
+
+  const useCredit = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/subscriptions/use-credit/",
+        {},
+        {
+          withCredentials: true,
+          headers: { "X-CSRFToken": csrftoken },
+        }
+      );
+      return response.data.success;
+    } catch (error) {
+      console.error("Use credit error:", error);
+      return false;
+    }
+  };
+
+  const fetchUserSubscription = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/subscriptions/user-subscription/",
+        {
+          withCredentials: true,
+          headers: { "X-CSRFToken": csrftoken },
+        }
+      );
+      setUserSubscription(response.data);
+    } catch (error) {
+      console.error("Failed to fetch subscription data", error);
+    }
+  };
+
+  const checkCompanyProfile = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/maker/company-details/",
+        {
+          withCredentials: true,
+          headers: { "X-CSRFToken": csrftoken },
+        }
+      );
+
+      if (response.data && response.data.company_name) {
+        setShowCompanyForm(false);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setShowCompanyForm(true);
+      } else {
+        console.error("Failed to check company profile", error);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchOpenProjects = async () => {
     try {
@@ -90,6 +166,18 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     }));
   };
 
+  const handleCreateQuotationClick = async (project) => {
+    // Check if user has credits available
+    const canSubmit = await checkCredits();
+    if (!canSubmit) {
+      alert("No credits available. Please upgrade your subscription to submit quotations.");
+      return;
+    }
+    
+    setSelectedProject(project);
+    setShowQuotationDialog(true);
+  };
+
   const handleSubmitQuotation = async (e) => {
     e.preventDefault();
     try {
@@ -101,8 +189,15 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
           headers: { "X-CSRFToken": csrftoken },
         }
       );
+      
+      // Deduct credit after successful quotation submission
+      await useCredit();
+      
       setShowQuotationDialog(false);
       alert("Quotation submitted successfully!");
+      
+      // Refresh subscription data to update credit count
+      fetchUserSubscription();
     } catch (error) {
       console.error("Failed to submit quotation", error);
       alert("Failed to submit quotation. Please try again.");
@@ -142,7 +237,6 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     website: "",
   });
 
-  // For checkboxes (specializations)
   const handleSpecializationChange = (e) => {
     const { value, checked } = e.target;
     setCompanyData((prev) => {
@@ -190,11 +284,22 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
       {/* Navigation */}
       <nav className="bg-white shadow-md fixed w-full z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:极速-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
@@ -209,13 +314,13 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.极速 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.极速-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                     />
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      d="M15 极速2a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
                 </div>
@@ -241,7 +346,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 className={`px-3 py-2 font-medium ${
                   activeSection === "quotations"
                     ? "text-blue-600"
-                    : "text-gray-600 hover:text-blue-600"
+                    : "text-gray-600 hover:text-blue-极速"
                 }`}
               >
                 My Quotations
@@ -259,6 +364,21 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
             </div>
 
             <div className="hidden md:flex items-center space-x-2">
+              <button 
+                onClick={() => navigate("/subscription")}
+                className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
+              >
+                {userSubscription && userSubscription.plan !== "none" ? (
+                  <span className="flex items-center">
+                    <span className="mr-2">Credits: {userSubscription.credits}</span>
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                      {userSubscription.plan}
+                    </span>
+                  </span>
+                ) : (
+                  "Subscribe"
+                )}
+              </button>
               <button className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800">
                 Profile
               </button>
@@ -319,7 +439,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       max={new Date().getFullYear()}
                       value={companyData.yearEstablished}
                       onChange={handleCompanyInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:极速line-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
                   </div>
@@ -384,29 +504,8 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <label
-                      htmlFor="country"
-                      className="block text-gray-700 text-sm font-medium mb-2"
-                    >
-                      Country
-                    </label>
-                    <select
-                      id="country"
-                      name="country"
-                      value={companyData.country}
-                      onChange={handleCompanyInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select Country</option>
-                      <option value="usa">United States</option>
-                      <option value="canada">Canada</option>
-                      <option value="uk">United Kingdom</option>
-                      <option value="germany">Germany</option>
-                      <option value="japan">Japan</option>
-                    </select>
-                  </div>
+                  
+                   
 
                   <div>
                     <label
@@ -464,7 +563,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   >
                     Website (optional)
                   </label>
-                  <input
+                <input
                     type="url"
                     id="website"
                     name="website"
@@ -494,6 +593,26 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             Maker Dashboard
           </h1>
+          
+          {/* Subscription Status Banner */}
+          {userSubscription && userSubscription.plan === "none" && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <p className="text-yellow-800">
+                  You need an active subscription to submit quotations.{" "}
+                  <button 
+                    onClick={() => navigate("/subscription")}
+                    className="font-medium underline hover:text-yellow-900"
+                  >
+                    Subscribe now
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Search and Filter Bar */}
@@ -509,7 +628,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      d="M8 4a4 4 极速 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -564,7 +683,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
         {/* Open Projects List */}
         <section id="projects">
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-sem极速 text-gray-900 mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Open Projects
             </h2>
 
@@ -603,13 +722,17 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                         </div>
                       </div>
                       <button
-                        onClick={() => {
-                          setSelectedProject(project);
-                          setShowQuotationDialog(true);
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition duration-300 whitespace-nowrap"
+                        onClick={() => handleCreateQuotationClick(project)}
+                        disabled={userSubscription && userSubscription.plan === "none"}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
+                          userSubscription && userSubscription.plan === "none"
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
+                        }`}
                       >
-                        Create Quotation
+                        {userSubscription && userSubscription.plan === "none"
+                          ? "Subscribe to Quote"
+                          : "Create Quotation"}
                       </button>
                     </div>
                   </div>
@@ -680,33 +803,40 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Percentage Change (%)
+                  <label
+                    className="block text-gray-700 text-sm font-medium mb-2"
+                    htmlFor="description"
+                  >
+                    Description
                   </label>
-                  <div className="flex items-center">
-                    <span className="text-sm text-gray-600 mr-2">
-                      {quotationData.percentageChange > 0 ? "+" : ""}
-                      {quotationData.percentageChange}%
-                    </span>
-                    <input
-                      type="range"
-                      min="-10"
-                      max="10"
-                      value={quotationData.percentageChange}
-                      onChange={(e) =>
-                        setQuotationData((prev) => ({
-                          ...prev,
-                          percentageChange: parseInt(e.target.value),
-                        }))
-                      }
-                      className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>-10%</span>
-                    <span>0%</span>
-                    <span>+10%</span>
-                  </div>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={3}
+                    value={quotationData.description}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                    placeholder="Describe your quotation and what services you'll provide"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text极速 font-medium mb-2"
+                    htmlFor="pdfUrl"
+                  >
+                    PDF URL (optional)
+                  </label>
+                  <input
+                    type="url"
+                    id="pdfUrl"
+                    name="pdfUrl"
+                    value={quotationData.pdfUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Link to your detailed quotation PDF"
+                  />
                 </div>
 
                 <div className="mb-6">

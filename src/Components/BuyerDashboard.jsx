@@ -346,13 +346,13 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.极速 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.极速-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.极速c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2极速4 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 极速724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                     />
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      d="M15 12a3 3 0 11-6 极速 3 3 0 016 0z"
                     />
                   </svg>
                 </div>
@@ -377,7 +377,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                 href="#projects"
                 className={`px-3 py-2 font-medium ${
                   activeSection === "projects"
-                    ? "text-blue-600"
+                    ? "极速blue-600"
                     : "text-gray-600 hover:text-blue-600"
                 }`}
               >
@@ -395,7 +395,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
               </a>
             </div>
 
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space极速x-2">
               <button
                 onClick={() => setShowSwitchDialog(true)}
                 className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
@@ -421,7 +421,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       </nav>
 
       {/* Dashboard Content */}
-      <div className="pt-24 md极速pt-32 pb-16 px-4 max-w-7xl mx-auto">
+      <div className="pt-24 md:pt-32 pb-16 px-4 max-w-7xl mx-auto">
         <section id="dashboard" className="mb-12">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -439,7 +439,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         {/* Project List/Status Overview */}
         <section id="projects" className="mb-12">
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semib极速 text-gray-900 mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Active Projects
             </h2>
             {projects.length > 0 ? (
@@ -485,7 +485,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3极速1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                             />
                           </svg>
                           Download PDF
@@ -537,36 +537,81 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                         Project
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Description
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Maker
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Amount (₹)
+                        Quotation
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Final Amount (₹)
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Completion Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Report
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {completedOrders.map((order) => (
-                      <tr key={order.id}>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {order.projectName}
+                      <tr key={order.completedId}>
+                        {/* Project */}
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                          <div className="font-semibold">
+                            {order.projectName}
+                          </div>
+                          <div className="text-gray-500 text-xs">
+                            {truncateDescription(
+                              order.projectDescription || "",
+                              60
+                            )}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-gray-500">
-                          {truncateDescription(order.description || "", 50)}
-                        </td>
+
+                        {/* Maker */}
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {order.makerName}
+                          <div>{order.makerName}</div>
+                          <div className="text-xs text-gray-400">
+                            {order.makerEmail}
+                          </div>
                         </td>
+
+                        {/* Quotation */}
+                        <td className="px-4 py-4 text-sm text-gray-500">
+                          ₹{order.quotationAmount || "N/A"}
+                          {order.quotationMessage && (
+                            <div className="text-xs text-gray-400 italic">
+                              "{truncateDescription(order.quotationMessage, 40)}
+                              "
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Final Price */}
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                           ₹{order.amount}
                         </td>
+
+                        {/* Completion Date */}
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(order.completionDate).toLocaleDateString()}
+                        </td>
+
+                        {/* Report */}
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-blue-600">
+                          {order.report ? (
+                            <a
+                              href={order.report}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline"
+                            >
+                              View Report
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">No Report</span>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -614,7 +659,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     className="h-6 w-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    view极速ox="0 0 24 24"
                   >
                     <path
                       strokeLinecap="round"
@@ -726,7 +771,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     name="address"
                     value={projectData.address}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:极速2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>
@@ -783,10 +828,10 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
                 {/* PDF Upload Field */}
                 <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
+                  <label className="block text-gray-700极速text-sm font-medium mb-2">
                     Upload Project Specifications (PDF)
                   </label>
-                  <div className="极速 items-center justify-center w-full">
+                  <div className="flex items-center justify-center w-full">
                     <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <svg
@@ -801,7 +846,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth="2"
-                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 极速 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                           />
                         </svg>
                         <p className="mb-2 text-sm text-gray-500">
@@ -898,8 +943,8 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow-lg max极速md w-full p-6">
+            <h2 className="text-xl极速font-bold text-gray-900 mb-4">
               Confirm Deletion
             </h2>
             <p className="text-gray-600 mb-6">
@@ -969,7 +1014,16 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                             Quotation #{quotation.quotation_id}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            Maker ID: {quotation.maker_id}
+                            Maker: {quotation.maker_name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Email: {quotation.maker_email}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Phone: {quotation.maker_phone}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Address: {quotation.maker_address}
                           </p>
                         </div>
                         <span className="text-lg font-bold text-blue-600">

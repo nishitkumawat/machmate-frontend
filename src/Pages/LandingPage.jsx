@@ -166,7 +166,7 @@ function LandingPage() {
           <div className="md:w-1/2 mb-10 md:mb-0 md:pr-8">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
               Connect with <span className="text-blue-600">Machine Makers</span>{" "}
-              Worldwide
+              Across the Country
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8">
               MachMate brings buyers and machine manufacturers together on one
@@ -386,10 +386,10 @@ function LandingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Global Network
+                Big Network
               </h3>
               <p className="text-gray-600">
-                Access machine makers from around the world with various
+                Access machine makers from around the Country with various
                 specializations and capabilities.
               </p>
             </div>

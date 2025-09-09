@@ -184,9 +184,7 @@ export default function PrivacyPolicy() {
         If you have any questions about this Privacy Policy, please contact us
         at:
         <br />
-        Email: privacy@machmate.com
-        <br />
-        Address: [Insert Company Address]
+        Email: machmate.contact@gmail.com
       </p>
     </LegalPageLayout>
   );

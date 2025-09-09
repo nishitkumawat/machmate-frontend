@@ -15,7 +15,7 @@ function Footer() {
             MachMate
           </h3>
           <p className="text-gray-400">
-            Connecting buyers and machine makers worldwide for custom
+            Connecting buyers and machine makers for custom
             manufacturing projects.
           </p>
         </div>

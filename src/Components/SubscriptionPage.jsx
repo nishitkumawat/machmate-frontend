@@ -7,6 +7,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const [userSubscription, setUserSubscription] = useState(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [userRole, setLocalUserRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
         "http://localhost:8000/subscriptions/user-subscription/",
         {
           withCredentials: true,
-          headers: { "X-CSRFToken": cs极速token },
+          headers: { "X-CSRFToken": csrftoken },
         }
       );
       setUserSubscription(response.data);
@@ -86,6 +87,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
   const handleSubscription = async (planId) => {
     try {
+      setIsLoading(true);
       // Create payment order
       const response = await axios.post(
         "http://localhost:8000/subscriptions/create-payment/",
@@ -103,7 +105,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => {
         const options = {
-          key: "YOUR_RAZORPAY_KEY_ID", // Replace with your Razorpay key
+          key: "rzp_live_RFvEkwRMzIFf2q", // Replace with your actual Razorpay key
           amount: amount,
           currency: currency,
           name: "MachMate",
@@ -111,46 +113,63 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
           order_id: order_id,
           handler: async function (response) {
             // Verify payment on server
-            const verifyResponse = await axios.post(
-              "http://localhost:8000/subscriptions/verify-payment/",
-              {
-                rzp_order_id: response.razorpay_order_id,
-                rzp_payment_id: response.razorpay_payment_id,
-                rzp_signature: response.razorpay_signature,
-                plan: planId,
-              },
-              {
-                withCredentials: true,
-                headers: { "X-CSRFToken": csrftoken },
-              }
-            );
+            try {
+              const verifyResponse = await axios.post(
+                "http://localhost:8000/subscriptions/verify-payment/",
+                {
+                  rzp_order_id: response.razorpay_order_id,
+                  rzp_payment_id: response.razorpay_payment_id,
+                  rzp_signature: response.razorpay_signature,
+                  plan: planId,
+                },
+                {
+                  withCredentials: true,
+                  headers: { "X-CSRFToken": csrftoken },
+                }
+              );
 
-            if (verifyResponse.data.success) {
-              alert("Subscription successful!");
-              fetchUserSubscription(); // Refresh subscription data
-            } else {
+              if (verifyResponse.data.success) {
+                alert("Subscription successful!");
+                fetchUserSubscription(); // Refresh subscription data
+              } else {
+                alert("Payment verification failed. Please try again.");
+              }
+            } catch (error) {
+              console.error("Payment verification error", error);
               alert("Payment verification failed. Please try again.");
             }
           },
           theme: {
             color: "#2563EB",
           },
+          prefill: {
+            name: "Customer Name", // You can prefill customer details if available
+            email: "customer@example.com",
+          },
         };
 
         const rzp = new window.Razorpay(options);
         rzp.open();
       };
+      script.onerror = () => {
+        console.error("Failed to load Razorpay script");
+        alert(
+          "Payment system is currently unavailable. Please try again later."
+        );
+        setIsLoading(false);
+      };
       document.body.appendChild(script);
     } catch (error) {
       console.error("Failed to create payment", error);
       alert("Failed to initiate payment. Please try again.");
+      setIsLoading(false);
     }
   };
 
   const handleCancelSubscription = async () => {
     try {
       await axios.post(
-        "极速ocalhost:8000/subscriptions/cancel-subscription/",
+        "http://localhost:8000/subscriptions/cancel-subscription/",
         {},
         {
           withCredentials: true,
@@ -171,7 +190,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
   const handleLogout = async () => {
     try {
-      const csrftoken = Cookies.get("csrftoken");
       await axios.post(
         "http://localhost:8000/auth/logout/",
         {},
@@ -198,6 +216,23 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     }
   };
 
+  // Fixed SVG component
+  const MachMateLogo = () => (
+    <svg
+      className="h-5 w-5 text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13 10V3L4 14h7v7l9-11h-7z"
+      />
+    </svg>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
       {/* Navigation */}
@@ -207,25 +242,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <div className="bg-blue-600 h-8 w-8 rounded-md flex items-center justify-center mr-2">
-                  <svg
-                    className="h-5 w-5 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 极速 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.极速-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      stroke极速inejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                  <MachMateLogo />
                 </div>
                 <span className="text-xl font-bold text-blue-600">
                   MachMate
@@ -246,7 +263,10 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
             </div>
 
             <div className="hidden md:flex items-center space-x-2">
-              <button className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800">
+              <button
+                onClick={() => navigate("/profile")}
+                className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
+              >
                 Profile
               </button>
               <button
@@ -263,7 +283,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       {/* Subscription Content */}
       <div className="pt-24 md:pt-32 pb-16 px-4 max-w-7xl mx-auto">
         <div className="mb-12 text-center">
-          <h1 className="text-2xl md:text-3极速 font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             Choose Your Plan
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -288,7 +308,8 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                   {userSubscription.credits} quotations remaining this month
                 </p>
                 <p className="text-gray-600">
-                  Plan valid until {userSubscription.end_date}
+                  Plan valid until{" "}
+                  {new Date(userSubscription.end_date).toLocaleDateString()}
                 </p>
               </div>
               <button
@@ -302,7 +323,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
         )}
 
         {/* Subscription Plans */}
-        <div className="grid grid-cols-1 md:极速rid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {subscriptionPlans.map((plan) => (
             <div
               key={plan.id}
@@ -352,13 +373,21 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
               <button
                 onClick={() => handleSubscription(plan.id)}
+                disabled={
+                  isLoading ||
+                  (userSubscription && userSubscription.plan === plan.id)
+                }
                 className={`w-full py-3 font-medium rounded-md transition duration-300 ${
-                  plan.recommended
+                  userSubscription && userSubscription.plan === plan.id
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : plan.recommended
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-blue-100 text-blue-600 hover:bg-blue-200"
                 }`}
               >
-                {userSubscription && userSubscription.plan === plan.id
+                {isLoading
+                  ? "Processing..."
+                  : userSubscription && userSubscription.plan === plan.id
                   ? "Current Plan"
                   : "Subscribe Now"}
               </button>
@@ -368,7 +397,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
         {/* Important Notice */}
         <div className="mt-12 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-          <h3 className="text-lg font-semib极速 text-yellow-800 mb-2">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">
             Important Information
           </h3>
           <ul className="list-disc list-inside text-yellow-700 space-y-1">
@@ -389,7 +418,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       {/* Cancel Subscription Dialog */}
       {showCancelDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-极速">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Cancel Subscription
             </h2>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import statesAndCitiesJSON from "../assets/states_and_districts.json";
 
 function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [showCompanyForm, setShowCompanyForm] = useState(false);
@@ -37,6 +38,8 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
+
+  const statesAndCities = statesAndCitiesJSON;
 
   useEffect(() => {
     axios.get("http://localhost:8000/csrf/", { withCredentials: true });
@@ -152,9 +155,10 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setQuotationData((prev) => ({
+    setProjectData((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "state" ? { city: "" } : {}),
     }));
   };
 
@@ -170,10 +174,12 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     // Check if user has credits available
     const canSubmit = await checkCredits();
     if (!canSubmit) {
-      alert("No credits available. Please upgrade your subscription to submit quotations.");
+      alert(
+        "No credits available. Please upgrade your subscription to submit quotations."
+      );
       return;
     }
-    
+
     setSelectedProject(project);
     setShowQuotationDialog(true);
   };
@@ -189,13 +195,13 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
           headers: { "X-CSRFToken": csrftoken },
         }
       );
-      
+
       // Deduct credit after successful quotation submission
       await useCredit();
-      
+
       setShowQuotationDialog(false);
       alert("Quotation submitted successfully!");
-      
+
       // Refresh subscription data to update credit count
       fetchUserSubscription();
     } catch (error) {
@@ -364,13 +370,15 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
             </div>
 
             <div className="hidden md:flex items-center space-x-2">
-              <button 
+              <button
                 onClick={() => navigate("/subscription")}
                 className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
               >
                 {userSubscription && userSubscription.plan !== "none" ? (
                   <span className="flex items-center">
-                    <span className="mr-2">Credits: {userSubscription.credits}</span>
+                    <span className="mr-2">
+                      Credits: {userSubscription.credits}
+                    </span>
                     <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                       {userSubscription.plan}
                     </span>
@@ -503,55 +511,58 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  
-                   
-
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {/* State Dropdown */}
                   <div>
                     <label
-                      htmlFor="state"
                       className="block text-gray-700 text-sm font-medium mb-2"
+                      htmlFor="state"
                     >
                       State
                     </label>
                     <select
                       id="state"
                       name="state"
-                      value={companyData.state}
-                      onChange={handleCompanyInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={projectData.state}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                     focus:outline-none focus:ring-2 focus:ring-blue-极速"
                       required
                     >
                       <option value="">Select State</option>
-                      <option value="ca">California</option>
-                      <option value="tx">Texas</option>
-                      <option value="ny">New York</option>
-                      <option value="fl">Florida</option>
-                      <option value="il">Illinois</option>
+                      {Object.keys(statesAndCities).map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
+                  {/* City Dropdown */}
                   <div>
                     <label
-                      htmlFor="city"
                       className="block text-gray-700 text-sm font-medium mb-2"
+                      htmlFor="city"
                     >
                       City
                     </label>
                     <select
                       id="city"
                       name="city"
-                      value={companyData.city}
-                      onChange={handleCompanyInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={projectData.city}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
+                      disabled={!projectData.state} // disable if no state selected
                     >
                       <option value="">Select City</option>
-                      <option value="losangeles">Los Angeles</option>
-                      <option value="houston">Houston</option>
-                      <option value="newyork">New York</option>
-                      <option value="miami">Miami</option>
-                      <option value="chicago">Chicago</option>
+                      {projectData.state &&
+                        statesAndCities[projectData.state].map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 </div>
@@ -563,7 +574,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   >
                     Website (optional)
                   </label>
-                <input
+                  <input
                     type="url"
                     id="website"
                     name="website"
@@ -590,20 +601,24 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
       {/* Dashboard Content */}
       <div className="pt-24 md:pt-32 pb-16 px-4 max-w-7xl mx-auto">
         <section id="dashboard" className="mb-12">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-            Maker Dashboard
-          </h1>
-          
           {/* Subscription Status Banner */}
           {userSubscription && userSubscription.plan === "none" && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <div className="flex items-center">
-                <svg className="h-5 w-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5 text-yellow-400 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <p className="text-yellow-800">
                   You need an active subscription to submit quotations.{" "}
-                  <button 
+                  <button
                     onClick={() => navigate("/subscription")}
                     className="font-medium underline hover:text-yellow-900"
                   >
@@ -628,7 +643,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M8 4a4 4 极速 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      d="M8 4a4 4  100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -708,7 +723,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                         </p>
                         <div className="flex flex-wrap gap-2 text-xs">
                           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {project.minPrice} - {project.maxPrice}
+                            ₹ {project.price}
                           </span>
                           <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
                             Due:{" "}
@@ -723,7 +738,9 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       </div>
                       <button
                         onClick={() => handleCreateQuotationClick(project)}
-                        disabled={userSubscription && userSubscription.plan === "none"}
+                        disabled={
+                          userSubscription && userSubscription.plan === "none"
+                        }
                         className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
                           userSubscription && userSubscription.plan === "none"
                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"

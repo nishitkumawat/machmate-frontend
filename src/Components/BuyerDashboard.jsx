@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import statesAndCitiesJSON from "../assets/states_and_districts.json";
 
 function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const [showProjectForm, setShowProjectForm] = useState(false);
@@ -10,15 +11,13 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [projects, setProjects] = useState([]);
   const [completedOrders, setCompletedOrders] = useState([]);
-  const [editingProject, setEditingProject] = useState(null);
+  const [editingProject, setEditingProject]= useState(null);
   const [projectData, setProjectData] = useState({
     name: "",
     description: "",
-    minPrice: 0,
     maxPrice: 10000,
     estimatedDate: "",
     address: "",
-    country: "",
     state: "",
     city: "",
     pdf: null,
@@ -125,6 +124,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     setProjectData((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "state" ? { city: "" } : {}),
     }));
   };
 
@@ -142,26 +142,26 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     }
   };
 
-  const handlePriceRangeChange = (min, max) => {
-    setProjectData((prev) => ({
-      ...prev,
-      minPrice: min,
-      maxPrice: max,
-    }));
-  };
-
   const handleSubmitProject = async (e) => {
     e.preventDefault();
+
+    // Validate that date is not in the past
+    const selectedDate = new Date(projectData.estimatedDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
+
+    if (selectedDate < today) {
+      alert("Estimated completion date cannot be in the past");
+      return;
+    }
 
     try {
       const formData = new FormData();
       formData.append("name", projectData.name);
       formData.append("description", projectData.description);
-      formData.append("minPrice", projectData.minPrice);
       formData.append("maxPrice", projectData.maxPrice);
       formData.append("estimatedDate", projectData.estimatedDate);
       formData.append("address", projectData.address);
-      formData.append("country", projectData.country);
       formData.append("state", projectData.state);
       formData.append("city", projectData.city);
 
@@ -170,9 +170,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       }
 
       if (editingProject) {
-        // Update existing project
-        await axios.put(
-          `http://localhost:8000/buyer/projects/${editingProject.id}/`,
+        // Update existing project - use POST instead of PUT
+        await axios.post(
+          `http://localhost:8000/buyer/projects/${editingProject.id}/update/`,
           formData,
           {
             withCredentials: true,
@@ -202,11 +202,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       setProjectData({
         name: "",
         description: "",
-        minPrice: 0,
         maxPrice: 10000,
         estimatedDate: "",
         address: "",
-        country: "",
         state: "",
         city: "",
         pdf: null,
@@ -217,6 +215,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       fetchProjects();
     } catch (error) {
       console.error("Failed to save project", error);
+      alert("Failed to save project. Please try again.");
     }
   };
 
@@ -225,11 +224,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     setProjectData({
       name: project.name,
       description: project.description,
-      minPrice: project.minPrice,
       maxPrice: project.maxPrice,
       estimatedDate: project.estimatedDate,
       address: project.address,
-      country: project.country,
       state: project.state,
       city: project.city,
       pdf: null, // Reset file when editing
@@ -267,7 +264,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
           headers: { "X-CSRFToken": csrftoken },
         }
       );
-    } catch (err) {
+    } catch (error) {
       console.error("Logout failed", err);
     }
 
@@ -277,17 +274,13 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     navigate("/");
   };
 
-  const handleSwitchToMaker = () => {
-    console.log("Switching to maker account");
-    setShowSwitchDialog(false);
-  };
-
   // Function to truncate description to a certain length
   const truncateDescription = (description, maxLength = 100) => {
     if (!description) return "";
     if (description.length <= maxLength) return description;
     return description.substring(0, maxLength) + "...";
   };
+
   const handleDeleteProject = (projectId) => {
     setProjectToDelete(projectId);
     setShowDeleteDialog(true);
@@ -295,9 +288,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const confirmDeleteProject = async () => {
     try {
-      // Get the CSRF token fresh each time, just like in other functions
-      // const csrftoken = Cookies.get("csrftoken");
-
       await axios.delete(
         `http://localhost:8000/buyer/projects/${projectToDelete}/`,
         {
@@ -315,8 +305,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       alert("Project deleted successfully!");
     } catch (error) {
       console.error("Failed to delete project", error);
-
-      // Handle specific error cases
       if (error.response?.status === 401) {
         alert("Your session has expired. Please log in again.");
         handleLogout();
@@ -326,6 +314,11 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       }
     }
   };
+
+  const statesAndCities = statesAndCitiesJSON;
+
+  // Get today's date in YYYY-MM-DD format for the date input min attribute
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
@@ -346,13 +339,13 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.极速c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2极速4 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 极速724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1极速756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                     />
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 极速 3 3 0 016 0z"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
                 </div>
@@ -377,7 +370,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                 href="#projects"
                 className={`px-3 py-2 font-medium ${
                   activeSection === "projects"
-                    ? "极速blue-600"
+                    ? "blue-600"
                     : "text-gray-600 hover:text-blue-600"
                 }`}
               >
@@ -395,19 +388,16 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
               </a>
             </div>
 
-            <div className="hidden md:flex items-center space极速x-2">
+            <div className="hidden md:flex items-center space-x-2">
               <button
-                onClick={() => setShowSwitchDialog(true)}
                 className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
+                onClick={() => navigate("/buyerprofile")}
               >
-                Switch to Maker
-              </button>
-              <button className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800">
                 Profile
               </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300"
+                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-极速 transition duration-300"
               >
                 Logout
               </button>
@@ -439,7 +429,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         {/* Project List/Status Overview */}
         <section id="projects" className="mb-12">
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <h2 className="text-xl font-semibold text-gray-600 mb-4">
               Active Projects
             </h2>
             {projects.length > 0 ? (
@@ -459,9 +449,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     </p>
 
                     <div className="flex justify-between text-sm">
-                      <span className="text-blue-600">
-                        ₹{project.minPrice} - ₹{project.maxPrice}
-                      </span>
+                      <span className="text-blue-600">₹{project.maxPrice}</span>
                       <span className="text-gray-500">
                         Expected:{" "}
                         {new Date(project.estimatedDate).toLocaleDateString()}
@@ -485,7 +473,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-极速 4m0 0l-4-4m4 4V4"
                             />
                           </svg>
                           Download PDF
@@ -642,11 +630,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     setProjectData({
                       name: "",
                       description: "",
-                      minPrice: 0,
                       maxPrice: 10000,
                       estimatedDate: "",
                       address: "",
-                      country: "",
                       state: "",
                       city: "",
                       pdf: null,
@@ -659,7 +645,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     className="h-6 w-6"
                     fill="none"
                     stroke="currentColor"
-                    view极速ox="0 0 24 24"
+                    viewBox="0 0 24 24"
                   >
                     <path
                       strokeLinecap="round"
@@ -709,35 +695,22 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Budget Range (₹)
+                  <label
+                    className="block text-gray-700 text-sm font-medium mb-2"
+                    htmlFor="maxPrice"
+                  >
+                    Budget (₹)
                   </label>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm text-gray-600">
-                      ₹{projectData.minPrice}
-                    </span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100000"
-                      value={projectData.minPrice}
-                      onChange={(e) =>
-                        handlePriceRangeChange(
-                          parseInt(e.target.value),
-                          projectData.maxPrice
-                        )
-                      }
-                      className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <span className="text-sm text-gray-600">
-                      ₹{projectData.maxPrice}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>₹0</span>
-                    <span>₹50,000</span>
-                    <span>₹100,000</span>
-                  </div>
+                  <input
+                    type="number"
+                    id="maxPrice"
+                    name="maxPrice"
+                    value={projectData.maxPrice}
+                    onChange={handleInputChange}
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
                 </div>
 
                 <div className="mb-4">
@@ -753,6 +726,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     name="estimatedDate"
                     value={projectData.estimatedDate}
                     onChange={handleInputChange}
+                    min={today}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -777,6 +751,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {/* State Dropdown */}
                   <div>
                     <label
                       className="block text-gray-700 text-sm font-medium mb-2"
@@ -789,18 +764,20 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       name="state"
                       value={projectData.state}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                     focus:outline-none focus:ring-2 focus:ring-blue-极速"
                       required
                     >
                       <option value="">Select State</option>
-                      <option value="ca">California</option>
-                      <option value="tx">Texas</option>
-                      <option value="ny">New York</option>
-                      <option value="fl">Florida</option>
-                      <option value="il">Illinois</option>
+                      {Object.keys(statesAndCities).map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
+                  {/* City Dropdown */}
                   <div>
                     <label
                       className="block text-gray-700 text-sm font-medium mb-2"
@@ -813,22 +790,24 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       name="city"
                       value={projectData.city}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
+                      disabled={!projectData.state} // disable if no state selected
                     >
                       <option value="">Select City</option>
-                      <option value="losangeles">Los Angeles</option>
-                      <option value="houston">Houston</option>
-                      <option value="newyork">New York</option>
-                      <option value="miami">Miami</option>
-                      <option value="chicago">Chicago</option>
+                      {projectData.state &&
+                        statesAndCities[projectData.state].map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 </div>
-
                 {/* PDF Upload Field */}
                 <div className="mb-6">
-                  <label className="block text-gray-700极速text-sm font-medium mb-2">
+                  <label className="block text-gray-700 text-sm font-medium mb-2">
                     Upload Project Specifications (PDF)
                   </label>
                   <div className="flex items-center justify-center w-full">
@@ -846,7 +825,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth="2"
-                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                            d="M13 13 3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 极速 0 8h2.167M10 15V6m极速 0L8 8m2-2 2 2"
                           />
                         </svg>
                         <p className="mb-2 text-sm text-gray-500">
@@ -882,11 +861,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       setProjectData({
                         name: "",
                         description: "",
-                        minPrice: 0,
                         maxPrice: 10000,
                         estimatedDate: "",
                         address: "",
-                        country: "",
                         state: "",
                         city: "",
                         pdf: null,
@@ -910,41 +887,11 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         </div>
       )}
 
-      {/* Switch to Maker Dialog */}
-      {showSwitchDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Switch to Maker Account
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to switch to a maker account? This will log
-              you out of your buyer account and redirect you to the maker
-              registration page.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowSwitchDialog(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition duration-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSwitchToMaker}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max极速md w-full p-6">
-            <h2 className="text-xl极速font-bold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
               Confirm Deletion
             </h2>
             <p className="text-gray-600 mb-6">

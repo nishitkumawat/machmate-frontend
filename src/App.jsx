@@ -15,6 +15,8 @@ import PrivacyPolicy from "./Pages/PrivacyPolicy";
 import ShippingPolicy from "./Pages/ShippingPolicy";
 import TermsAndConditions from "./Pages/TermsAndConditions";
 
+import BuyerProfile from "./Components/BuyerProfile";
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -160,6 +162,7 @@ function App() {
       <Route path="/shipping" element={<ShippingPolicy />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/cancellation" element={<CancellationRefunds />} />
+      <Route path="/buyerprofile" element={<BuyerProfile />} />
     </Routes>
   );
 }

@@ -8,6 +8,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [userRole, setLocalUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(null);
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
@@ -86,83 +87,117 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   };
 
   const handleSubscription = async (planId) => {
+    if (isLoading) return;
+    setLoadingPlan(planId);
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      // Create payment order
+      // 1️⃣ Create payment order on backend
       const response = await axios.post(
         "http://localhost:8000/subscriptions/create-payment/",
         { plan: planId },
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
+        { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
 
       const { order_id, amount, currency } = response.data;
 
-      // Load Razorpay script
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => {
-        const options = {
-          key: "rzp_live_RFvEkwRMzIFf2q", // Replace with your actual Razorpay key
-          amount: amount,
-          currency: currency,
-          name: "MachMate",
-          description: `Subscription for ${planId} plan`,
-          order_id: order_id,
-          handler: async function (response) {
-            // Verify payment on server
-            try {
-              const verifyResponse = await axios.post(
-                "http://localhost:8000/subscriptions/verify-payment/",
-                {
-                  rzp_order_id: response.razorpay_order_id,
-                  rzp_payment_id: response.razorpay_payment_id,
-                  rzp_signature: response.razorpay_signature,
-                  plan: planId,
-                },
-                {
-                  withCredentials: true,
-                  headers: { "X-CSRFToken": csrftoken },
-                }
-              );
-
-              if (verifyResponse.data.success) {
-                alert("Subscription successful!");
-                fetchUserSubscription(); // Refresh subscription data
-              } else {
-                alert("Payment verification failed. Please try again.");
+      // 2️⃣ Load Razorpay script if not loaded
+      if (!window.Razorpay) {
+        await new Promise((resolve, reject) => {
+          if (document.getElementById("razorpay-script")) {
+            // If script is already loading, wait for it
+            const checkInterval = setInterval(() => {
+              if (window.Razorpay) {
+                clearInterval(checkInterval);
+                resolve();
               }
-            } catch (error) {
-              console.error("Payment verification error", error);
+            }, 100);
+            return;
+          }
+
+          const script = document.createElement("script");
+          script.src = "https://checkout.razorpay.com/v1/checkout.js";
+          script.id = "razorpay-script";
+          script.onload = () => {
+            console.log("Razorpay script loaded successfully");
+            resolve();
+          };
+          script.onerror = () => {
+            console.error("Failed to load Razorpay script");
+            reject(new Error("Razorpay script failed to load"));
+          };
+          document.body.appendChild(script);
+        });
+      }
+
+      // 3️⃣ Initialize Razorpay checkout
+      const options = {
+        key: "rzp_test_RH3ixs0hei2zdF", // Your Razorpay key
+        amount: amount, // amount in paise
+        currency: currency,
+        name: "MachMate",
+        description: `${planId} Plan Subscription`,
+        order_id: order_id, // mandatory
+        handler: async (razorpayResponse) => {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await axios.post(
+              "http://localhost:8000/subscriptions/verify-payment/",
+              {
+                razorpay_order_id: razorpayResponse.razorpay_order_id,
+                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                razorpay_signature: razorpayResponse.razorpay_signature,
+                plan: planId,
+              },
+              { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
+            );
+
+            if (verifyResponse.data.success) {
+              alert("Subscription successful!");
+              fetchUserSubscription();
+            } else {
               alert("Payment verification failed. Please try again.");
             }
+          } catch (err) {
+            console.error("Payment verification error:", err);
+            alert("Payment verification failed. Please try again.");
+          }
+        },
+        prefill: {
+          name: "Customer Name",
+          email: "customer@example.com",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+        modal: {
+          ondismiss: function () {
+            setIsLoading(false);
+            setLoadingPlan(null);
           },
-          theme: {
-            color: "#2563EB",
-          },
-          prefill: {
-            name: "Customer Name", // You can prefill customer details if available
-            email: "customer@example.com",
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+        },
       };
-      script.onerror = () => {
-        console.error("Failed to load Razorpay script");
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        console.error("Payment failed:", response.error);
+        alert(`Payment failed: ${response.error.description}`);
+        setIsLoading(false);
+        setLoadingPlan(null);
+      });
+      rzp.open();
+    } catch (err) {
+      console.error("Payment initiation failed:", err);
+      if (err.response && err.response.data && err.response.data.error) {
+        alert(`Payment failed: ${err.response.data.error}`);
+      } else {
         alert(
           "Payment system is currently unavailable. Please try again later."
         );
-        setIsLoading(false);
-      };
-      document.body.appendChild(script);
-    } catch (error) {
-      console.error("Failed to create payment", error);
-      alert("Failed to initiate payment. Please try again.");
+      }
+    } finally {
       setIsLoading(false);
+      setLoadingPlan(null);
     }
   };
 
@@ -171,10 +206,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       await axios.post(
         "http://localhost:8000/subscriptions/cancel-subscription/",
         {},
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
+        { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
 
       alert(
@@ -193,10 +225,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       await axios.post(
         "http://localhost:8000/auth/logout/",
         {},
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
+        { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
     } catch (err) {
       console.error("Logout failed", err);
@@ -209,14 +238,10 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   };
 
   const navigateToDashboard = () => {
-    if (userRole === "maker") {
-      navigate("/maker-dashboard");
-    } else {
-      navigate("/dashboard");
-    }
+    if (userRole === "maker") navigate("/maker-dashboard");
+    else navigate("/dashboard");
   };
 
-  // Fixed SVG component
   const MachMateLogo = () => (
     <svg
       className="h-5 w-5 text-white"
@@ -293,7 +318,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
           </p>
         </div>
 
-        {/* Current Subscription Status */}
         {userSubscription && userSubscription.plan !== "none" && (
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -305,7 +329,8 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                   {userSubscription.plan} Plan
                 </p>
                 <p className="text-gray-600">
-                  {userSubscription.credits} quotations remaining this month
+                  {userSubscription.remaining_credits} quotations remaining this
+                  month
                 </p>
                 <p className="text-gray-600">
                   Plan valid until{" "}
@@ -385,7 +410,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                     : "bg-blue-100 text-blue-600 hover:bg-blue-200"
                 }`}
               >
-                {isLoading
+                {isLoading && loadingPlan === plan.id
                   ? "Processing..."
                   : userSubscription && userSubscription.plan === plan.id
                   ? "Current Plan"
@@ -395,7 +420,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
           ))}
         </div>
 
-        {/* Important Notice */}
         <div className="mt-12 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-yellow-800 mb-2">
             Important Information
@@ -415,10 +439,9 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
         </div>
       </div>
 
-      {/* Cancel Subscription Dialog */}
       {showCancelDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-极速">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Cancel Subscription
             </h2>

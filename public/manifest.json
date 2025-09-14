@@ -1,12 +1,11 @@
 {
-  "name": "Machmate",
-  "short_name": "Machmate",
-  "description": "Machmate helps makers and buyers connect, manage projects, and handle payments seamlessly.",
+  "name": "My Web App",
+  "short_name": "WebApp",
+  "description": "A description of my web application",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e90ff",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -18,10 +17,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "serviceworker": {
-    "src": "/service-worker.js",
-    "scope": "/",
-    "type": "classic"
-  }
+  ]
 }

@@ -16,6 +16,7 @@ import ShippingPolicy from "./Pages/ShippingPolicy";
 import TermsAndConditions from "./Pages/TermsAndConditions";
 
 import BuyerProfile from "./Components/BuyerProfile";
+import MakerProfile from "./Components/MakerProfile";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -163,6 +164,7 @@ function App() {
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/cancellation" element={<CancellationRefunds />} />
       <Route path="/buyerprofile" element={<BuyerProfile />} />
+      <Route path="/makerprofile" element={<MakerProfile />} />
     </Routes>
   );
 }

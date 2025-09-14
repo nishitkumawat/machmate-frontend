@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import statesAndCitiesJSON from "../assets/states_and_districts.json";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  Calendar,
+  Tag,
+  Search,
+  X,
+  Upload,
+} from "lucide-react";
 
 function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [showCompanyForm, setShowCompanyForm] = useState(false);
@@ -12,18 +21,20 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     amount: "",
     description: "",
     completionDate: "",
-    pdfUrl: "", // Added pdfUrl field
+    pdf: null,
   });
+  const [pdfFileName, setPdfFileName] = useState("");
   const [filters, setFilters] = useState({
     price: "",
     date: "",
-    location: "",
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [openProjects, setOpenProjects] = useState([]);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [isLoading, setIsLoading] = useState(true);
   const [userSubscription, setUserSubscription] = useState(null);
+  const [userState, setUserState] = useState("");
+  const [userQuotations, setUserQuotations] = useState([]);
 
   const specializationsList = [
     "CNC Machining",
@@ -40,12 +51,14 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const navigate = useNavigate();
 
   const statesAndCities = statesAndCitiesJSON;
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     axios.get("http://localhost:8000/csrf/", { withCredentials: true });
     fetchOpenProjects();
     checkCompanyProfile();
     fetchUserSubscription();
+    fetchUserQuotations();
 
     const handleScroll = () => {
       const sections = document.querySelectorAll("section");
@@ -64,6 +77,21 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const fetchUserQuotations = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/maker/quotations/",
+        {
+          withCredentials: true,
+          headers: { "X-CSRFToken": csrftoken },
+        }
+      );
+      setUserQuotations(response.data);
+    } catch (error) {
+      console.error("Failed to fetch user quotations", error);
+    }
+  };
 
   // Credit checking functions
   const checkCredits = async () => {
@@ -87,15 +115,16 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
       const response = await axios.post(
         "http://localhost:8000/subscriptions/use-credit/",
         {},
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
+        { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
-      return response.data.success;
+      return response.data;
     } catch (error) {
-      console.error("Use credit error:", error);
-      return false;
+      console.error("Use credit error details:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      throw error; // Re-throw to handle in calling function
     }
   };
 
@@ -126,6 +155,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
       if (response.data && response.data.company_name) {
         setShowCompanyForm(false);
+        setUserState(response.data.state);
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -155,11 +185,24 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProjectData((prev) => ({
+    setQuotationData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "state" ? { city: "" } : {}),
     }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setQuotationData((prev) => ({
+        ...prev,
+        pdf: file,
+      }));
+      setPdfFileName(file.name);
+    } else {
+      alert("Please select a PDF file");
+      e.target.value = null;
+    }
   };
 
   const handleFilterChange = (e) => {
@@ -171,7 +214,6 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   };
 
   const handleCreateQuotationClick = async (project) => {
-    // Check if user has credits available
     const canSubmit = await checkCredits();
     if (!canSubmit) {
       alert(
@@ -187,23 +229,43 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const handleSubmitQuotation = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append("amount", quotationData.amount);
+      formData.append("description", quotationData.description);
+      formData.append("completionDate", quotationData.completionDate);
+
+      if (quotationData.pdf) {
+        formData.append("pdf", quotationData.pdf);
+      }
+
       await axios.post(
         `http://localhost:8000/maker/projects/${selectedProject.id}/quotation/`,
-        quotationData,
+        formData,
         {
           withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
+          headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
-      // Deduct credit after successful quotation submission
       await useCredit();
 
       setShowQuotationDialog(false);
-      alert("Quotation submitted successfully!");
+      setQuotationData({
+        amount: "",
+        description: "",
+        completionDate: "",
+        pdf: null,
+      });
+      setPdfFileName("");
 
-      // Refresh subscription data to update credit count
+      // Refresh the quotations list
+      fetchUserQuotations();
       fetchUserSubscription();
+
+      alert("Quotation submitted successfully!");
     } catch (error) {
       console.error("Failed to submit quotation", error);
       alert("Failed to submit quotation. Please try again.");
@@ -283,11 +345,61 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
         }
       );
       setShowCompanyForm(false);
+      setUserState(companyData.state);
       alert("Company profile saved successfully!");
     } catch (error) {
       console.error("Failed to save company profile", error);
       alert("Failed to save profile. Please try again.");
     }
+  };
+
+  // Filter and sort projects
+  const filterAndSortProjects = () => {
+    let filteredProjects = openProjects.filter((project) => {
+      const matchesSearch =
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    });
+
+    // Split into same state and other states
+    let sameStateProjects = filteredProjects.filter(
+      (project) => project.state === userState
+    );
+    let otherStateProjects = filteredProjects.filter(
+      (project) => project.state !== userState
+    );
+
+    // Sort by price
+    const sortByPrice = (projects, order) => {
+      return [...projects].sort((a, b) => {
+        const priceA = parseFloat(a.price);
+        const priceB = parseFloat(b.price);
+        return order === "low" ? priceA - priceB : priceB - priceA;
+      });
+    };
+
+    // Sort by date
+    const sortByDate = (projects, order) => {
+      return [...projects].sort((a, b) => {
+        const dateA = new Date(a.estimatedDate);
+        const dateB = new Date(b.estimatedDate);
+        return order === "oldest" ? dateA - dateB : dateB - dateA;
+      });
+    };
+
+    // Apply sorting
+    if (filters.price) {
+      sameStateProjects = sortByPrice(sameStateProjects, filters.price);
+      otherStateProjects = sortByPrice(otherStateProjects, filters.price);
+    }
+
+    if (filters.date) {
+      sameStateProjects = sortByDate(sameStateProjects, filters.date);
+      otherStateProjects = sortByDate(otherStateProjects, filters.date);
+    }
+
+    return { sameStateProjects, otherStateProjects };
   };
 
   if (isLoading) {
@@ -301,12 +413,15 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     );
   }
 
+  const { sameStateProjects, otherStateProjects } = filterAndSortProjects();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
       {/* Navigation */}
       <nav className="bg-white shadow-md fixed w-full z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:极速-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
+            {/* Logo */}
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <div className="bg-blue-600 h-8 w-8 rounded-md flex items-center justify-center mr-2">
@@ -320,13 +435,9 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.极速 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.极速-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 极速2a3 3 0 11-6 0 3 3 0 016 0z"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 
+                012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 
+                0119 9.414V19a2 2 0 01-2 极速2z"
                     />
                   </svg>
                 </div>
@@ -336,6 +447,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
               </div>
             </div>
 
+            {/* Desktop Links */}
             <div className="hidden md:flex items-center space-x-4">
               <a
                 href="#dashboard"
@@ -352,7 +464,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 className={`px-3 py-2 font-medium ${
                   activeSection === "quotations"
                     ? "text-blue-600"
-                    : "text-gray-600 hover:text-blue-极速"
+                    : "text-gray-600 hover:text-blue-600"
                 }`}
               >
                 My Quotations
@@ -369,6 +481,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
               </a>
             </div>
 
+            {/* Desktop Buttons */}
             <div className="hidden md:flex items-center space-x-2">
               <button
                 onClick={() => navigate("/subscription")}
@@ -377,7 +490,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 {userSubscription && userSubscription.plan !== "none" ? (
                   <span className="flex items-center">
                     <span className="mr-2">
-                      Credits: {userSubscription.credits}
+                      Credits: {userSubscription.remaining_credits}
                     </span>
                     <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                       {userSubscription.plan}
@@ -387,7 +500,10 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   "Subscribe"
                 )}
               </button>
-              <button className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800">
+              <button
+                className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
+                onClick={() => navigate("/makerprofile")}
+              >
                 Profile
               </button>
               <button
@@ -398,11 +514,79 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
               </button>
             </div>
 
+            {/* Mobile Toggler */}
             <div className="md:hidden flex items-center">
-              {/* Mobile menu button would go here */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-gray-600 hover:text-blue-600 focus:outline-none"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t shadow-md">
+            <div className="px-4 pt-2 pb-4 space-y-2">
+              <a
+                href="#dashboard"
+                className="block text-gray-700 hover:text-blue-600"
+              >
+                Dashboard
+              </a>
+              <a
+                href="#quotations"
+                className="block text-gray-700 hover:text-blue-600"
+              >
+                My Quotations
+              </a>
+              <a
+                href="#projects"
+                className="block text-gray-700 hover:text-blue-600"
+              >
+                Active Projects
+              </a>
+              <button
+                onClick={() => navigate("/subscription")}
+                className="block w-full text-left text-gray-700 hover:text-blue-600"
+              >
+                {userSubscription && userSubscription.plan !== "none"
+                  ? `Credits: ${userSubscription.remaining_credits} (${userSubscription.plan})`
+                  : "Subscribe"}
+              </button>
+              <button
+                className="block w-full text-left text-gray-700 hover:text-blue-600"
+                onClick={() => navigate("/makerprofile")}
+              >
+                Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left text-red-600 hover:text-red-800"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Company Details Form for First-Time Users */}
@@ -435,7 +619,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   <div>
                     <label
                       htmlFor="yearEstablished"
-                      className="block text-gray-700 text-sm font-medium mb-2"
+                      className="block text-gray-700 text极速-sm font-medium mb-2"
                     >
                       Year Established
                     </label>
@@ -447,7 +631,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       max={new Date().getFullYear()}
                       value={companyData.yearEstablished}
                       onChange={handleCompanyInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:极速line-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
                   </div>
@@ -512,7 +696,6 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  {/* State Dropdown */}
                   <div>
                     <label
                       className="block text-gray-700 text-sm font-medium mb-2"
@@ -523,10 +706,9 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                     <select
                       id="state"
                       name="state"
-                      value={projectData.state}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                     focus:outline-none focus:ring-2 focus:ring-blue-极速"
+                      value={companyData.state}
+                      onChange={handleCompanyInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     >
                       <option value="">Select State</option>
@@ -538,7 +720,6 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                     </select>
                   </div>
 
-                  {/* City Dropdown */}
                   <div>
                     <label
                       className="block text-gray-700 text-sm font-medium mb-2"
@@ -549,16 +730,15 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                     <select
                       id="city"
                       name="city"
-                      value={projectData.city}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={companyData.city}
+                      onChange={handleCompanyInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
-                      disabled={!projectData.state} // disable if no state selected
+                      disabled={!companyData.state}
                     >
                       <option value="">Select City</option>
-                      {projectData.state &&
-                        statesAndCities[projectData.state].map((city) => (
+                      {companyData.state &&
+                        statesAndCities[companyData.state].map((city) => (
                           <option key={city} value={city}>
                             {city}
                           </option>
@@ -601,7 +781,6 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
       {/* Dashboard Content */}
       <div className="pt-24 md:pt-32 pb-16 px-4 max-w-7xl mx-auto">
         <section id="dashboard" className="mb-12">
-          {/* Subscription Status Banner */}
           {userSubscription && userSubscription.plan === "none" && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <div className="flex items-center">
@@ -612,7 +791,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 >
                   <path
                     fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5极速.58-9.92zM11 13a1 1 0 11-2 0 1 1 极速0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                     clipRule="evenodd"
                   />
                 </svg>
@@ -633,64 +812,100 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
         {/* Search and Filter Bar */}
         <div className="bg-white rounded-xl shadow-md p-4 mb-6">
           <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-            <div className="flex-1">
-              <div className="relative">
+            {/* Search Bar */}
+            <div className="flex w-full md:flex-1 items-center space-x-2">
+              <div className="relative flex-grow md:flex-grow">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4  100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 md:w-full w-[70%]"
                 />
+              </div>
+
+              {/* Filters inline on small screens - icon only */}
+              <div className="flex flex-row space-x-2 md:hidden">
+                {/* Price Sort */}
+                <div className="relative w-10">
+                  <select
+                    name="price"
+                    value={filters.price}
+                    onChange={handleFilterChange}
+                    className="appearance-none w-full h-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 "
+                  >
+                    <option value="" hidden></option>
+                    <option value="low">Low to High</option>
+                    <option value="high">High to Low</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 left-0 flex items-center justify-center pointer-events-none">
+                    <Tag className="w-4 h-4 text-gray-500" />
+                  </div>
+                </div>
+
+                {/* Date Sort */}
+                <div className="relative w-10">
+                  <select
+                    name="date"
+                    value={filters.date}
+                    onChange={handleFilterChange}
+                    className="appearance-none w-full h-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-transparent"
+                  >
+                    <option value="" hidden></option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 left-0 flex items-center justify-center pointer-events-none">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-              <select
-                name="price"
-                value={filters.price}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Price</option>
-                <option value="low">Low to High</option>
-                <option value="high">High to Low</option>
-              </select>
+            {/* Filters full view on desktop */}
+            <div className="hidden md:flex flex-row space-x-2">
+              {/* Price Sort */}
+              <div className="relative">
+                <select
+                  name="price"
+                  value={filters.price}
+                  onChange={handleFilterChange}
+                  className="appearance-none px-3 py-2 border border-gray-300 rounded-md pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="" hidden>
+                    Price
+                  </option>
+                  <option value="low">Low to High</option>
+                  <option value="high">High to Low</option>
+                </select>
+                <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                  <ArrowUpDown className="w-4 h-4 text-gray-500 block md:hidden" />
+                  <ChevronDown className="w-4 h-4 text-gray-500 hidden md:block" />
+                </div>
+              </div>
 
-              <select
-                name="date"
-                value={filters.date}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Date</option>
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-              </select>
-
-              <select
-                name="location"
-                value={filters.location}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Location</option>
-                <option value="local">Local First</option>
-                <option value="any">Any Location</option>
-              </select>
+              {/* Date Sort */}
+              <div className="relative">
+                <select
+                  name="date"
+                  value={filters.date}
+                  onChange={handleFilterChange}
+                  className="appearance-none px-3 py-2 border border-gray-300 rounded-md pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="" hidden>
+                    Date
+                  </option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+                <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                  <ArrowUpDown className="w-4 h-4 text-gray-500 block md:hidden" />
+                  <ChevronDown className="w-4 h-4 text-gray-500 hidden md:block" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -702,55 +917,282 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
               Open Projects
             </h2>
 
-            {openProjects.length === 0 ? (
+            {sameStateProjects.length === 0 &&
+            otherStateProjects.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
                 No open projects found matching your criteria.
               </p>
             ) : (
-              <div className="space-y-4">
-                {openProjects.map((project) => (
+              <div>
+                {/* Same State Projects */}
+                {sameStateProjects.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-medium text-green-700 mb-4 flex items-center">
+                      <svg
+                        className="h-5 w-5 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Projects in Your State ({userState})
+                    </h3>
+                    <div className="space-y-4">
+                      {sameStateProjects.map((project) => (
+                        <div
+                          key={project.id}
+                          className="border border-green-200 rounded-lg p-4 hover:shadow-md transition duration-300 bg-green-50"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-gray-900 mb-1">
+                                {project.name}
+                              </h3>
+                              <p className="text-sm text-gray-600 mb-2">
+                                {project.description}
+                              </p>
+                              <div className="flex flex-wrap gap-2 text-xs">
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  ₹ {project.price}
+                                </span>
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                                  Due:{" "}
+                                  {new Date(
+                                    project.estimatedDate
+                                  ).toLocaleDateString("en-GB")}
+                                </span>
+                                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                  {project.city}, {project.state}
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleCreateQuotationClick(project)
+                              }
+                              disabled={
+                                userSubscription &&
+                                userSubscription.plan === "none"
+                              }
+                              className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
+                                userSubscription &&
+                                userSubscription.plan === "none"
+                                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                  : "bg-green-600 text-white hover:bg-green-700"
+                              }`}
+                            >
+                              {userSubscription &&
+                              userSubscription.plan === "none"
+                                ? "Subscribe to Quote"
+                                : "Create Quotation"}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Other State Projects */}
+                {otherStateProjects.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-4">
+                      Projects in Other States
+                    </h3>
+                    <div className="space-y-4">
+                      {otherStateProjects.map((project) => (
+                        <div
+                          key={project.id}
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-300"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-gray-900 mb-1">
+                                {project.name}
+                              </h3>
+                              <p className="text-sm text-gray-极速600 mb-2">
+                                {project.description}
+                              </p>
+                              <div className="flex flex-wrap gap-2 text-xs">
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  ₹ {project.price}
+                                </span>
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                                  Due:{" "}
+                                  {new Date(
+                                    project.estimatedDate
+                                  ).toLocaleDateString("en-GB")}
+                                </span>
+                                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                  {project.city}, {project.state}
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleCreateQuotationClick(project)
+                              }
+                              disabled={
+                                userSubscription &&
+                                userSubscription.plan === "none"
+                              }
+                              className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
+                                userSubscription &&
+                                userSubscription.plan === "none"
+                                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                  : "bg-blue-600 text-white hover:bg-blue-700"
+                              }`}
+                            >
+                              {userSubscription &&
+                              userSubscription.plan === "none"
+                                ? "Subscribe to Quote"
+                                : "Create Quotation"}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Quotations Section */}
+        <section id="quotations" className="mb-12 mt-12">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              My Quotations
+            </h2>
+
+            {userQuotations.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">
+                You haven't submitted any quotations yet.
+              </p>
+            ) : (
+              <div className="space-y-6">
+                {userQuotations.map((quotation) => (
                   <div
-                    key={project.id}
+                    key={quotation.quotation_id}
                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-300"
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-gray-900 mb-1">
-                          {project.name}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-gray-900 mb-1">
+                          {quotation.project_name}
                         </h3>
                         <p className="text-sm text-gray-600 mb-2">
-                          {project.description}
+                          {quotation.project_description}
                         </p>
                         <div className="flex flex-wrap gap-2 text-xs">
                           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            ₹ {project.price}
+                            Quoted: ₹ {quotation.price}
                           </span>
                           <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                            Due:{" "}
-                            {new Date(
-                              project.estimatedDate
-                            ).toLocaleDateString()}
+                            Budget: ₹ {quotation.project_budget}
                           </span>
                           <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                            {project.city}, {project.state}
+                            Completion:{" "}
+                            {new Date(
+                              quotation.estimated_date
+                            ).toLocaleDateString("en-GB")}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded text-xs ${
+                              quotation.status === "accepted"
+                                ? "bg-green-100 text-green-800"
+                                : quotation.status === "rejected"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            Status:{" "}
+                            {quotation.status.charAt(0).toUpperCase() +
+                              quotation.status.slice(1)}
                           </span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleCreateQuotationClick(project)}
-                        disabled={
-                          userSubscription && userSubscription.plan === "none"
-                        }
-                        className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
-                          userSubscription && userSubscription.plan === "none"
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-blue-600 text-white hover:bg-blue-700"
-                        }`}
-                      >
-                        {userSubscription && userSubscription.plan === "none"
-                          ? "Subscribe to Quote"
-                          : "Create Quotation"}
-                      </button>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">
+                          Submitted on{" "}
+                          {new Date(quotation.created_at).toLocaleDateString(
+                            "en-GB"
+                          )}
+                        </p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Buyer: {quotation.buyer_name}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* PDF Downloads Section */}
+                    <div className="border-t pt-3 mt-3">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Documents:
+                      </h4>
+                      <div className="flex flex-wrap gap-3">
+                        {/* Quotation PDF */}
+                        {quotation.pdf_quotation && (
+                          <a
+                            href={`http://localhost:8000${quotation.pdf_quotation}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                            Quotation PDF
+                          </a>
+                        )}
+
+                        {/* Report PDF - Assuming your backend returns this as pdf_report */}
+                        {quotation.pdf_report && (
+                          <a
+                            href={`http://localhost:8000${quotation.pdf_report}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                            Report PDF
+                          </a>
+                        )}
+
+                        {/* If no PDFs available */}
+                        {!quotation.pdf_quotation && !quotation.pdf_report && (
+                          <span className="text-sm text-gray-500">
+                            No documents available
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -762,30 +1204,27 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
       {/* Quotation Dialog */}
       {showQuotationDialog && selectedProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-screen overflow-y-auto relative">
             <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
                   Create Quotation
                 </h2>
                 <button
-                  onClick={() => setShowQuotationDialog(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setShowQuotationDialog(false);
+                    setQuotationData({
+                      amount: "",
+                      description: "",
+                      completionDate: "",
+                      pdf: null,
+                    });
+                    setPdfFileName("");
+                  }}
+                  className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full p-2 transition"
                 >
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="h-6 w-6" />
                 </button>
               </div>
 
@@ -804,7 +1243,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                     className="block text-gray-700 text-sm font-medium mb-2"
                     htmlFor="amount"
                   >
-                    Quotation Amount ($)
+                    Quotation Amount (₹)
                   </label>
                   <input
                     type="number"
@@ -838,22 +1277,37 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   />
                 </div>
 
+                {/* PDF Upload Field */}
                 <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text极速 font-medium mb-2"
-                    htmlFor="pdfUrl"
-                  >
-                    PDF URL (optional)
+                  <label className="block text-gray-700 text-sm font-medium mb-2">
+                    Upload Quotation (PDF)
                   </label>
-                  <input
-                    type="url"
-                    id="pdfUrl"
-                    name="pdfUrl"
-                    value={quotationData.pdfUrl}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Link to your detailed quotation PDF"
-                  />
+                  <div className="flex items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span>{" "}
+                          or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PDF only (MAX. 10MB)
+                        </p>
+                      </div>
+                      <input
+                        id="pdf-upload"
+                        type="file"
+                        className="hidden"
+                        accept=".pdf"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  </div>
+                  {pdfFileName && (
+                    <p className="mt-2 text-sm text-gray-600">
+                      Selected file: {pdfFileName}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-6">
@@ -877,7 +1331,16 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
-                    onClick={() => setShowQuotationDialog(false)}
+                    onClick={() => {
+                      setShowQuotationDialog(false);
+                      setQuotationData({
+                        amount: "",
+                        description: "",
+                        completionDate: "",
+                        pdf: null,
+                      });
+                      setPdfFileName("");
+                    }}
                     className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition duration-300"
                   >
                     Cancel

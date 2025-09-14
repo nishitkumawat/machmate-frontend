@@ -2,6 +2,8 @@ import React from "react";
 import Navigation from "../Components/Navigation";
 import Footer from "../Components/Footer";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function LegalPageLayout({ title, children }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">

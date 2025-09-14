@@ -21,6 +21,7 @@ import MakerProfile from "./Components/MakerProfile";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const API_HOST = import.meta.env.VITE_API_HOST;
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -40,7 +41,7 @@ function App() {
     // fallback to backend session
     const checkAuth = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/auth/me/", {
+        const res = await axios.get(API_HOST+"/auth/me/", {
           withCredentials: true,
         });
         if (res.data.isAuthenticated) {

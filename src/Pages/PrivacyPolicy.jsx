@@ -1,6 +1,8 @@
 import React from "react";
 import LegalPageLayout from "./LegalPageLayout";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 export default function PrivacyPolicy() {
   return (
     <LegalPageLayout title="Privacy Policy">

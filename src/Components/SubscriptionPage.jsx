@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const [userSubscription, setUserSubscription] = useState(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -59,7 +61,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
   const getUserRole = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/auth/me/", {
+      const response = await axios.get(API_HOST+"/auth/me/", {
         withCredentials: true,
         headers: { "X-CSRFToken": csrftoken },
       });
@@ -74,7 +76,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const fetchUserSubscription = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/subscriptions/user-subscription/",
+        API_HOST+"/subscriptions/user-subscription/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -94,7 +96,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     try {
       // 1️⃣ Create payment order on backend
       const response = await axios.post(
-        "http://localhost:8000/subscriptions/create-payment/",
+        API_HOST+"/subscriptions/create-payment/",
         { plan: planId },
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -142,7 +144,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
           try {
             // Verify payment on backend
             const verifyResponse = await axios.post(
-              "http://localhost:8000/subscriptions/verify-payment/",
+              API_HOST+"/subscriptions/verify-payment/",
               {
                 razorpay_order_id: razorpayResponse.razorpay_order_id,
                 razorpay_payment_id: razorpayResponse.razorpay_payment_id,
@@ -204,7 +206,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const handleCancelSubscription = async () => {
     try {
       await axios.post(
-        "http://localhost:8000/subscriptions/cancel-subscription/",
+        API_HOST+"/subscriptions/cancel-subscription/",
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -223,7 +225,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:8000/auth/logout/",
+        API_HOST+"/auth/logout/",
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );

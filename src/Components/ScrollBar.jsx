@@ -1,6 +1,8 @@
 // src/Components/BlueScrollbar.jsx
 import React, { useEffect } from "react";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 const Scrollbar = () => {
   useEffect(() => {
     const style = document.createElement("style");

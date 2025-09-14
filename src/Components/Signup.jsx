@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 const Signup = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -56,7 +58,7 @@ const Signup = () => {
 
     setIsSubmitting(true);
     try {
-      await axios.post("http://localhost:8000/auth/register/", {
+      await axios.post(API_HOST+"/auth/register/", {
         name: formData.username,
         email: formData.email,
         password: formData.password,

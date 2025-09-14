@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import LegalPageLayout from "./LegalPageLayout";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 export default function ContactUs() {
   const [formData, setFormData] = useState({
     name: "",

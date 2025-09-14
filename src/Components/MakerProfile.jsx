@@ -4,6 +4,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import statesAndCitiesJSON from "../assets/states_and_districts.json";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function MakerProfile({ setIsAuthenticated, setUserRole }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
@@ -54,7 +56,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("http://localhost:8000/auth/profile/", {
+      const response = await axios.get(API_HOST+"/auth/profile/", {
         withCredentials: true,
         headers: { "X-CSRFToken": csrftoken },
       });
@@ -81,7 +83,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
   const fetchCompanyData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/maker/company-details/",
+        API_HOST+"/maker/company-details/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -175,7 +177,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
       }
 
       const response = await axios.put(
-        "http://localhost:8000/auth/profile/update/",
+        API_HOST+"/auth/profile/update/",
         payload,
         {
           withCredentials: true,
@@ -215,12 +217,12 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
       setIsLoading(true);
 
       const endpoint = hasCompanyProfile
-        ? "http://localhost:8000/maker/company-details/update/"
-        : "http://localhost:8000/maker/company-details/create/";
+        ? API_HOST+"/maker/company-details/update/"
+        : API_HOST+"/maker/company-details/create/";
 
       const method = hasCompanyProfile ? "put" : "post";
 
-      // const endpoint = "http://localhost:8000/maker/company-details/create/";
+      // const endpoint = API_HOST+"/maker/company-details/create/";
       // const method = "post";
 
       await axios[method](
@@ -276,7 +278,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
       };
 
       const response = await axios.post(
-        "http://localhost:8000/auth/profile/change-password/",
+        API_HOST+"/auth/profile/change-password/",
         payload,
         {
           withCredentials: true,
@@ -328,7 +330,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:8000/auth/logout/",
+        API_HOST+"/auth/logout/",
         {},
         {
           withCredentials: true,

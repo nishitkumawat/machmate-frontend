@@ -1,6 +1,8 @@
 import React from "react";
 import machmateLogo from "../assets/machmate-logo.png";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 px-4">

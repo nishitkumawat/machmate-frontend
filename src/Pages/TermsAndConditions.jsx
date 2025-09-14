@@ -1,6 +1,8 @@
 import React from "react";
 import LegalPageLayout from "./LegalPageLayout";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function TermsAndConditions() {
   return (
     <LegalPageLayout title="Terms & Conditions">

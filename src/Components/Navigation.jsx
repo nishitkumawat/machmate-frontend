@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 import machmateLogo from "../assets/machmate-dark.png";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();

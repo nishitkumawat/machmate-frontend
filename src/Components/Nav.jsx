@@ -9,6 +9,8 @@ const navItems = [
   { id: "price", label: "Pricing" },
 ];
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 const Nav = () => {
   // const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("home");

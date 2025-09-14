@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function BuyerProfile({ setIsAuthenticated, setUserRole }) {
   const [activeTab, setActiveTab] = useState("personal");
   const [userData, setUserData] = useState({
@@ -27,7 +29,7 @@ function BuyerProfile({ setIsAuthenticated, setUserRole }) {
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("http://localhost:8000/auth/profile/", {
+      const response = await axios.get(API_HOST+"/auth/profile/", {
         withCredentials: true,
         headers: { "X-CSRFToken": csrftoken },
       });
@@ -86,7 +88,7 @@ function BuyerProfile({ setIsAuthenticated, setUserRole }) {
       }
 
       const response = await axios.put(
-        "http://localhost:8000/auth/profile/update/",
+        API_HOST+"/auth/profile/update/",
         payload,
         {
           withCredentials: true,
@@ -139,7 +141,7 @@ function BuyerProfile({ setIsAuthenticated, setUserRole }) {
       };
 
       const response = await axios.post(
-        "http://localhost:8000/auth/profile/change-password/",
+        API_HOST+"/auth/profile/change-password/",
         payload,
         {
           withCredentials: true,
@@ -188,7 +190,7 @@ function BuyerProfile({ setIsAuthenticated, setUserRole }) {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:8000/auth/logout/",
+        API_HOST+"/auth/logout/",
         {},
         {
           withCredentials: true,

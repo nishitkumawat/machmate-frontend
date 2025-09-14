@@ -13,6 +13,8 @@ import {
   Upload,
 } from "lucide-react";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [showCompanyForm, setShowCompanyForm] = useState(false);
   const [showQuotationDialog, setShowQuotationDialog] = useState(false);
@@ -54,7 +56,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/csrf/", { withCredentials: true });
+    axios.get(API_HOST+"/csrf/", { withCredentials: true });
     fetchOpenProjects();
     checkCompanyProfile();
     fetchUserSubscription();
@@ -81,7 +83,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const fetchUserQuotations = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/maker/quotations/",
+        API_HOST+"/maker/quotations/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -97,7 +99,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const checkCredits = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/subscriptions/check-credits/",
+        API_HOST+"/subscriptions/check-credits/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -113,7 +115,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const useCredit = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/subscriptions/use-credit/",
+        API_HOST+"/subscriptions/use-credit/",
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -131,7 +133,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const fetchUserSubscription = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/subscriptions/user-subscription/",
+        API_HOST+"/subscriptions/user-subscription/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -146,7 +148,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const checkCompanyProfile = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/maker/company-details/",
+        API_HOST+"/maker/company-details/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -171,7 +173,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const fetchOpenProjects = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/maker/projects/open/",
+        API_HOST+"/maker/projects/open/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -239,7 +241,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
       }
 
       await axios.post(
-        `http://localhost:8000/maker/projects/${selectedProject.id}/quotation/`,
+        API_HOST+`/maker/projects/${selectedProject.id}/quotation/`,
         formData,
         {
           withCredentials: true,
@@ -276,7 +278,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     try {
       const csrftoken = Cookies.get("csrftoken");
       await axios.post(
-        "http://localhost:8000/auth/logout/",
+        API_HOST+"/auth/logout/",
         {},
         {
           withCredentials: true,
@@ -327,7 +329,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     e.preventDefault();
     try {
       await axios.post(
-        "http://localhost:8000/maker/company-details/",
+        API_HOST+"/maker/company-details/",
         {
           company_name: companyData.companyName,
           year_established: companyData.yearEstablished,
@@ -1139,7 +1141,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                         {/* Quotation PDF */}
                         {quotation.pdf_quotation && (
                           <a
-                            href={`http://localhost:8000${quotation.pdf_quotation}`}
+                            href={API_HOST+`${quotation.pdf_quotation}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
@@ -1164,7 +1166,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                         {/* Report PDF - Assuming your backend returns this as pdf_report */}
                         {quotation.pdf_report && (
                           <a
-                            href={`http://localhost:8000${quotation.pdf_report}`}
+                            href={API_HOST+`${quotation.pdf_report}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded"

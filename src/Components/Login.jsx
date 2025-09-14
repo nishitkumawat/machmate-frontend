@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
+const API_HOST = import.meta.env.VITE_API_HOST;
+
 const Login = ({ setIsAuthenticated, setUserRole }) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -40,7 +42,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     setIsSubmitting(true);
     try {
       const response = await axios.post(
-        "http://localhost:8000/auth/login/",
+        API_HOST+"/auth/login/",
         {
           email: formData.email,
           password: formData.password,

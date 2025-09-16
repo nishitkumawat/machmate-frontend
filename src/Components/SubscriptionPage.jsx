@@ -61,7 +61,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
   const getUserRole = async () => {
     try {
-      const response = await axios.get(API_HOST+"/auth/me/", {
+      const response = await axios.get(API_HOST + "/auth/me/", {
         withCredentials: true,
         headers: { "X-CSRFToken": csrftoken },
       });
@@ -76,7 +76,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const fetchUserSubscription = async () => {
     try {
       const response = await axios.get(
-        API_HOST+"/subscriptions/user-subscription/",
+        API_HOST + "/subscriptions/user-subscription/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -96,7 +96,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     try {
       // 1️⃣ Create payment order on backend
       const response = await axios.post(
-        API_HOST+"/subscriptions/create-payment/",
+        API_HOST + "/subscriptions/create-payment/",
         { plan: planId },
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -144,7 +144,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
           try {
             // Verify payment on backend
             const verifyResponse = await axios.post(
-              API_HOST+"/subscriptions/verify-payment/",
+              API_HOST + "/subscriptions/verify-payment/",
               {
                 razorpay_order_id: razorpayResponse.razorpay_order_id,
                 razorpay_payment_id: razorpayResponse.razorpay_payment_id,
@@ -206,7 +206,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const handleCancelSubscription = async () => {
     try {
       await axios.post(
-        API_HOST+"/subscriptions/cancel-subscription/",
+        API_HOST + "/subscriptions/cancel-subscription/",
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -225,7 +225,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const handleLogout = async () => {
     try {
       await axios.post(
-        API_HOST+"/auth/logout/",
+        API_HOST + "/auth/logout/",
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -263,13 +263,26 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
       {/* Navigation */}
+      {/* Navigation - Updated */}
       <nav className="bg-white shadow-md fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <div className="bg-blue-600 h-8 w-8 rounded-md flex items-center justify-center mr-2">
-                  <MachMateLogo />
+                  <svg
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
                 </div>
                 <span className="text-xl font-bold text-blue-600">
                   MachMate
@@ -279,12 +292,12 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
             <div className="hidden md:flex items-center space-x-4">
               <button
-                onClick={navigateToDashboard}
+                onClick={() => navigate("/dashboard")}
                 className="px-3 py-2 font-medium text-gray-600 hover:text-blue-600"
               >
                 Dashboard
               </button>
-              <button className="px-3 py-2 font-medium text-blue-600 border-b-2 border-blue-600">
+              <button className="px-3 py-2 font-medium text-blue-600">
                 Subscription
               </button>
             </div>

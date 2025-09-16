@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../Components/Footer";
-import machmateLogo from "../assets/machmate-dark.png";
+import machmateLogo from "../assets/logo-dark.png";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -16,7 +16,10 @@ function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
+              <div
+                className="flex-shrink-0 flex items-center"
+                // onClick={() => navigate("/")}
+              >
                 <img
                   src={machmateLogo}
                   alt="MachMate Logo"
@@ -176,10 +179,19 @@ function LandingPage() {
               payments and quality assurance.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300 shadow-md">
+              <button
+                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300 shadow-md"
+                onClick={() => navigate("/login")}
+              >
                 Get Started
               </button>
-              <button className="px-6 py-3 border border-blue-600 text-blue-600 font-medium rounded-md hover:bg-blue-50 transition duration-300">
+              <button
+                className="px-6 py-3 border border-blue-600 text-blue-600 font-medium rounded-md hover:bg-blue-50 transition duration-300"
+                onClick={() => {
+                  const el = document.getElementById("how-it-works");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
                 Learn More
               </button>
             </div>
@@ -576,10 +588,16 @@ function LandingPage() {
             Join thousands of buyers and machine makers on our platform today
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <button className="px-8 py-3 bg-white text-blue-600 font-medium rounded-md hover:bg-blue-50 transition duration-300 shadow-md">
+            <button
+              className="px-8 py-3 bg-white text-blue-600 font-medium rounded-md hover:bg-blue-50 transition duration-300 shadow-md"
+              onClick={() => navigate("/signup")}
+            >
               Sign Up as Buyer
             </button>
-            <button className="px-8 py-3 border border-white text-white font-medium rounded-md hover:bg-blue-700 transition duration-300">
+            <button
+              className="px-8 py-3 border border-white text-white font-medium rounded-md hover:bg-blue-700 transition duration-300"
+              onClick={() => navigate("/signup")}
+            >
               Sign Up as Maker
             </button>
           </div>

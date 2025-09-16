@@ -1141,7 +1141,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                         {/* Quotation PDF */}
                         {quotation.pdf_quotation && (
                           <a
-                            href={API_HOST+`${quotation.pdf_quotation}`}
+                            href={`${quotation.pdf_quotation}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
@@ -1166,7 +1166,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                         {/* Report PDF - Assuming your backend returns this as pdf_report */}
                         {quotation.pdf_report && (
                           <a
-                            href={API_HOST+`${quotation.pdf_report}`}
+                            href={`${quotation.pdf_report}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded"

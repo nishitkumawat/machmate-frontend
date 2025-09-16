@@ -41,7 +41,7 @@ function App() {
     // fallback to backend session
     const checkAuth = async () => {
       try {
-        const res = await axios.get(API_HOST+"/auth/me/", {
+        const res = await axios.get(API_HOST + "/auth/me/", {
           withCredentials: true,
         });
         if (res.data.isAuthenticated) {
@@ -164,8 +164,33 @@ function App() {
       <Route path="/shipping" element={<ShippingPolicy />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/cancellation" element={<CancellationRefunds />} />
-      <Route path="/buyerprofile" element={<BuyerProfile />} />
-      <Route path="/makerprofile" element={<MakerProfile />} />
+      <Route
+        path="/buyerprofile"
+        element={
+          isAuthenticated && userRole === "buyer" ? (
+            <BuyerProfile
+              setIsAuthenticated={setIsAuthenticated}
+              setUserRole={setUserRole}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/makerprofile"
+        element={
+          isAuthenticated && userRole === "maker" ? (
+            <MakerProfile
+              setIsAuthenticated={setIsAuthenticated}
+              setUserRole={setUserRole}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
     </Routes>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import machmateLogo from "../assets/machmate-dark.png";
+import machmateLogo from "../assets/icon-512x512.png";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 

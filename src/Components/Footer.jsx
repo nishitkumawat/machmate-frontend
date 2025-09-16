@@ -1,5 +1,5 @@
 import React from "react";
-import machmateLogo from "../assets/machmate-logo.png";
+import machmateLogo from "../assets/icon-512x512.png";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 

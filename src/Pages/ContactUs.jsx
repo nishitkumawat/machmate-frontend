@@ -94,16 +94,12 @@ export default function ContactUs() {
             <h3 className="font-semibold text-gray-900 mb-4">Business Hours</h3>
             <ul className="space-y-2">
               <li className="flex justify-between">
-                <span className="text-gray-600">Monday - Friday</span>
-                <span className="font-medium">9:00 AM - 6:00 PM</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-gray-600">Saturday</span>
-                <span className="font-medium">10:00 AM - 4:00 PM</span>
+                <span className="text-gray-600">Monday - Saturday</span>
+                <span className="font-medium">6:00 AM - 11:00 PM</span>
               </li>
               <li className="flex justify-between">
                 <span className="text-gray-600">Sunday</span>
-                <span className="font-medium">Closed</span>
+                <span className="font-medium">11:00 AM - 5:00 PM</span>
               </li>
             </ul>
           </div>

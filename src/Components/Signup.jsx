@@ -102,6 +102,9 @@ const Signup = () => {
       }
 
       if (type === "phone") {
+        await axios.post(API_HOST + "/auth/send-phone-otp/", {
+          phone: formData.phone,
+        });
         setOtpSent({ ...otpSent, phone: true });
         setVerificationModal("phone");
         setResendTimer((prev) => ({ ...prev, phone: 30 })); // 30 sec cooldown

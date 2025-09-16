@@ -174,9 +174,9 @@ function LandingPage() {
               Across the Country
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8">
-              MachMate brings buyers and machine manufacturers together on one
-              platform to streamline custom manufacturing projects with secure
-              payments and quality assurance.
+              Revelat brings Work Seekers and Machine Owners together on one
+              platform - post your machining requirement for free, get multiple
+              verified quotations, and choose the best price and delivery.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <button
@@ -200,75 +200,52 @@ function LandingPage() {
             <div className="w-full max-w-md bg-blue-100 rounded-xl p-6 shadow-lg">
               <div className="bg-white rounded-lg overflow-hidden shadow-md">
                 <div className="bg-blue-600 py-3 px-4 text-white font-semibold">
-                  <h3 className="text-lg">Project Dashboard</h3>
+                  <h3 className="text-lg">How It Works</h3>
                 </div>
                 <div className="p-4">
-                  <div className="flex items-center mb-4">
+                  {/* Step 1 */}
+                  <div className="flex items-start mb-6">
                     <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                      <svg
-                        className="h-6 w-6 text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
+                      <span className="text-lg font-bold text-blue-600">1</span>
                     </div>
                     <div>
-                      <h4 className="font-medium">New Project Request</h4>
+                      <h4 className="font-medium">
+                        Post Your Machining Requirement
+                      </h4>
                       <p className="text-sm text-gray-500">
-                        From Industrial Solutions Ltd.
+                        Upload your drawing or job details in just a few clicks.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center mb-4">
+
+                  {/* Step 2 */}
+                  <div className="flex items-start mb-6">
                     <div className="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                      <svg
-                        className="h-6 w-6 text-green-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <span className="text-lg font-bold text-green-600">
+                        2
+                      </span>
                     </div>
                     <div>
-                      <h4 className="font-medium">Quote Accepted</h4>
+                      <h4 className="font-medium">
+                        Receive Multiple Quotations
+                      </h4>
                       <p className="text-sm text-gray-500">
-                        Precision Parts Project
+                        Get offers directly from verified Machine Owners.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center">
+
+                  {/* Step 3 */}
+                  <div className="flex items-start">
                     <div className="h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                      <svg
-                        className="h-6 w-6 text-purple-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <span className="text-lg font-bold text-purple-600">
+                        3
+                      </span>
                     </div>
                     <div>
-                      <h4 className="font-medium">Production Update</h4>
+                      <h4 className="font-medium">Select the Best Quotation</h4>
                       <p className="text-sm text-gray-500">
-                        Phase 2 in progress
+                        Save time and cost by choosing the most suitable option.
                       </p>
                     </div>
                   </div>
@@ -282,62 +259,125 @@ function LandingPage() {
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 bg-white px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Machine Owners */}
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            How <span className="text-blue-600">MachMate</span> Works
+            For <span className="text-blue-600">Machine Owners</span>
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-20">
+            {/* More Work Opportunities */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💼</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                More Work Opportunities
+              </h3>
+              <p className="text-gray-600">
+                Access machining jobs from verified customers across industries.
+              </p>
+            </div>
+
+            {/* Secure Payments */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💸</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Secure Payments
+              </h3>
+              <p className="text-gray-600">
+                Protected payment system ensures guaranteed payout for completed
+                work.
+              </p>
+            </div>
+
+            {/* Membership Benefits */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">⭐</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Membership Benefits
+              </h3>
+              <p className="text-gray-600">
+                Premium features to grow visibility and get priority leads.
+              </p>
+            </div>
+
+            {/* Dedicated Support */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🤝</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Dedicated Support
+              </h3>
+              <p className="text-gray-600">
+                Our team assists with payments, disputes, and smooth customer
+                communication.
+              </p>
+            </div>
+          </div>
+
+          {/* Work Seekers */}
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            For <span className="text-blue-600">Work Seekers</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {/* Step 1 */}
+            {/* 0% Platform Fee */}
             <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl font-bold">1</span>
+                <span className="text-2xl">🆓</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Create a Project
+                0% Platform Fee
               </h3>
               <p className="text-gray-600">
-                Buyers post their machine requirements with specifications,
-                budget, and timeline.
+                Post your machining requirement free of cost—no hidden charges.
               </p>
             </div>
 
-            {/* Step 2 */}
+            {/* Easy Work Posting */}
             <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl font-bold">2</span>
+                <span className="text-2xl">📌</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Receive Quotes
+                Easy Work Posting
               </h3>
               <p className="text-gray-600">
-                Machine makers submit competitive quotes for your project.
+                Just describe your job and instantly reach a wide network of
+                machine owners.
               </p>
             </div>
 
-            {/* Step 3 */}
+            {/* Multiple Quotations */}
             <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl font-bold">3</span>
+                <span className="text-2xl">📑</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Select & Pay
+                Multiple Quotations
               </h3>
               <p className="text-gray-600">
-                Choose the best quote and pay securely through our phased
-                payment system.
+                Compare offers from different machine owners and choose the best
+                fit.
               </p>
             </div>
 
-            {/* Step 4 */}
+            {/* Save Time & Money */}
             <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-xl font-bold">4</span>
+                <span className="text-2xl">⏱️</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Get Your Machine
+                Save Time & Money
               </h3>
               <p className="text-gray-600">
-                Track progress and receive your completed machine on schedule.
+                Quickly find the right partner, compare prices, and optimize
+                costs.
               </p>
             </div>
           </div>

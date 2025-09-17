@@ -18,16 +18,43 @@ export default function ContactUs() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    alert("Thank you for your message. We'll get back to you soon!");
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
+    setLoading(true);
+    setStatus(null);
+
+    try {
+      const response = await fetch(`${API_HOST}/contact/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus({
+          type: "success",
+          message: "✅ Thank you for your message. We'll get back to you soon!",
+        });
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        const errorData = await response.json();
+        setStatus({
+          type: "error",
+          message:
+            errorData.error || "❌ Something went wrong. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setStatus({
+        type: "error",
+        message: "⚠️ Unable to connect to server. Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

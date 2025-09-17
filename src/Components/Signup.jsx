@@ -326,7 +326,7 @@ const Signup = () => {
                     onChange={handleChange}
                     className="h-4 w-4 text-blue-400"
                   />
-                  <span className="ml-2">Buyer</span>
+                  <span className="ml-2">Work Seeker</span>
                 </label>
                 <label className="flex items-center text-white">
                   <input
@@ -337,7 +337,7 @@ const Signup = () => {
                     onChange={handleChange}
                     className="h-4 w-4 text-blue-400"
                   />
-                  <span className="ml-2">Machine Maker</span>
+                  <span className="ml-2">Machine Owner</span>
                 </label>
               </div>
             </div>

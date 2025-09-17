@@ -259,6 +259,68 @@ function LandingPage() {
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 bg-white px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Work Seekers */}
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            For <span className="text-blue-600">Work Seekers</span>
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-20">
+            {/* 0% Platform Fee */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🆓</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                0% Platform Fee
+              </h3>
+              <p className="text-gray-600">
+                Post your machining requirement free of cost—no hidden charges.
+              </p>
+            </div>
+
+            {/* Easy Work Posting */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📌</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Easy Work Posting
+              </h3>
+              <p className="text-gray-600">
+                Just describe your job and instantly reach a wide network of
+                machine owners.
+              </p>
+            </div>
+
+            {/* Multiple Quotations */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📑</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Multiple Quotations
+              </h3>
+              <p className="text-gray-600">
+                Compare offers from different machine owners and choose the best
+                fit.
+              </p>
+            </div>
+
+            {/* Save Time & Money */}
+            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">⏱️</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Save Time & Money
+              </h3>
+              <p className="text-gray-600">
+                Quickly find the right partner, compare prices, and optimize
+                costs.
+              </p>
+            </div>
+          </div>
+
           {/* Machine Owners */}
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
             For <span className="text-blue-600">Machine Owners</span>
@@ -316,68 +378,6 @@ function LandingPage() {
               <p className="text-gray-600">
                 Our team assists with payments, disputes, and smooth customer
                 communication.
-              </p>
-            </div>
-          </div>
-
-          {/* Work Seekers */}
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            For <span className="text-blue-600">Work Seekers</span>
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {/* 0% Platform Fee */}
-            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🆓</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                0% Platform Fee
-              </h3>
-              <p className="text-gray-600">
-                Post your machining requirement free of cost—no hidden charges.
-              </p>
-            </div>
-
-            {/* Easy Work Posting */}
-            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📌</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Easy Work Posting
-              </h3>
-              <p className="text-gray-600">
-                Just describe your job and instantly reach a wide network of
-                machine owners.
-              </p>
-            </div>
-
-            {/* Multiple Quotations */}
-            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📑</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Multiple Quotations
-              </h3>
-              <p className="text-gray-600">
-                Compare offers from different machine owners and choose the best
-                fit.
-              </p>
-            </div>
-
-            {/* Save Time & Money */}
-            <div className="bg-blue-50 rounded-xl p-6 text-center shadow-md hover:shadow-lg transition duration-300">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⏱️</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Save Time & Money
-              </h3>
-              <p className="text-gray-600">
-                Quickly find the right partner, compare prices, and optimize
-                costs.
               </p>
             </div>
           </div>

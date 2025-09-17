@@ -13,7 +13,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [projects, setProjects] = useState([]);
   const [completedOrders, setCompletedOrders] = useState([]);
-  const [editingProject, setEditingProject]= useState(null);
+  const [editingProject, setEditingProject] = useState(null);
   const [projectData, setProjectData] = useState({
     name: "",
     description: "",
@@ -35,7 +35,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   // Fetch projects and orders on component mount
   useEffect(() => {
-    axios.get(API_HOST+"/csrf/", { withCredentials: true });
+    axios.get(API_HOST + "/csrf/", { withCredentials: true });
 
     fetchProjects();
     fetchCompletedOrders();
@@ -61,13 +61,10 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get(
-        API_HOST+"/buyer/projects/",
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
-      );
+      const response = await axios.get(API_HOST + "/buyer/projects/", {
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
       setProjects(response.data);
     } catch (error) {
       console.error("Failed to fetch projects", error);
@@ -76,10 +73,10 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const fetchCompletedOrders = async () => {
     try {
-      const response = await axios.get(
-        API_HOST+"/buyer/orders/completed/",
-        { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
-      );
+      const response = await axios.get(API_HOST + "/buyer/orders/completed/", {
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
       setCompletedOrders(response.data);
     } catch (error) {
       console.error("Failed to fetch completed orders", error);
@@ -89,7 +86,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const fetchQuotations = async (projectId) => {
     try {
       const response = await axios.get(
-        API_HOST+`/buyer/projects/${projectId}/quotations/`,
+        API_HOST + `/buyer/projects/${projectId}/quotations/`,
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
       setQuotations(response.data);
@@ -103,7 +100,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const acceptQuotation = async (quotationId) => {
     try {
       await axios.post(
-        API_HOST+`/buyer/quotations/${quotationId}/accept/`,
+        API_HOST + `/buyer/quotations/${quotationId}/accept/`,
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -174,7 +171,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       if (editingProject) {
         // Update existing project - use POST instead of PUT
         await axios.post(
-          API_HOST+`/buyer/projects/${editingProject.id}/update/`,
+          API_HOST + `/buyer/projects/${editingProject.id}/update/`,
           formData,
           {
             withCredentials: true,
@@ -186,17 +183,13 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         );
       } else {
         // Create new project
-        await axios.post(
-          API_HOST+"/buyer/projects/create/",
-          formData,
-          {
-            withCredentials: true,
-            headers: {
-              "X-CSRFToken": csrftoken,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await axios.post(API_HOST + "/buyer/projects/create/", formData, {
+          withCredentials: true,
+          headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
       setShowProjectForm(false);
@@ -259,7 +252,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     try {
       const csrftoken = Cookies.get("csrftoken");
       await axios.post(
-        API_HOST+"/auth/logout/",
+        API_HOST + "/auth/logout/",
         {},
         {
           withCredentials: true,
@@ -290,15 +283,12 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const confirmDeleteProject = async () => {
     try {
-      await axios.delete(
-        API_HOST+`/buyer/projects/${projectToDelete}/`,
-        {
-          withCredentials: true,
-          headers: {
-            "X-CSRFToken": csrftoken,
-          },
-        }
-      );
+      await axios.delete(API_HOST + `/buyer/projects/${projectToDelete}/`, {
+        withCredentials: true,
+        headers: {
+          "X-CSRFToken": csrftoken,
+        },
+      });
 
       // Refresh projects list
       fetchProjects();
@@ -417,7 +407,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         <section id="dashboard" className="mb-12">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Buyer Dashboard
+              Dashboard
             </h1>
             <button
               onClick={() => setShowProjectForm(true)}

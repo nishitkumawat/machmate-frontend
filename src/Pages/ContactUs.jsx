@@ -10,6 +10,8 @@ export default function ContactUs() {
     subject: "",
     message: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -60,6 +62,7 @@ export default function ContactUs() {
   return (
     <LegalPageLayout title="Contact Us">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left Section */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Get In Touch
@@ -112,7 +115,6 @@ export default function ContactUs() {
               <div>
                 <h3 className="font-semibold text-gray-900">Email</h3>
                 <p className="text-gray-600">machmate.contact@gmail.com</p>
-                <br />
               </div>
             </div>
           </div>
@@ -132,6 +134,7 @@ export default function ContactUs() {
           </div>
         </div>
 
+        {/* Right Section */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Send Us a Message
@@ -209,11 +212,28 @@ export default function ContactUs() {
               ></textarea>
             </div>
 
+            {status && (
+              <div
+                className={`p-3 rounded-md text-sm ${
+                  status.type === "success"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {status.message}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+              disabled={loading}
+              className={`w-full py-3 px-4 rounded-md transition duration-300 ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
             >
-              Send Message
+              {loading ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>

@@ -56,7 +56,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    axios.get(API_HOST+"/csrf/", { withCredentials: true });
+    axios.get(API_HOST + "/csrf/", { withCredentials: true });
     fetchOpenProjects();
     checkCompanyProfile();
     fetchUserSubscription();
@@ -82,13 +82,10 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const fetchUserQuotations = async () => {
     try {
-      const response = await axios.get(
-        API_HOST+"/maker/quotations/",
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
-      );
+      const response = await axios.get(API_HOST + "/maker/quotations/", {
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
       setUserQuotations(response.data);
     } catch (error) {
       console.error("Failed to fetch user quotations", error);
@@ -99,7 +96,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const checkCredits = async () => {
     try {
       const response = await axios.get(
-        API_HOST+"/subscriptions/check-credits/",
+        API_HOST + "/subscriptions/check-credits/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -115,7 +112,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const useCredit = async () => {
     try {
       const response = await axios.post(
-        API_HOST+"/subscriptions/use-credit/",
+        API_HOST + "/subscriptions/use-credit/",
         {},
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
@@ -133,7 +130,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const fetchUserSubscription = async () => {
     try {
       const response = await axios.get(
-        API_HOST+"/subscriptions/user-subscription/",
+        API_HOST + "/subscriptions/user-subscription/",
         {
           withCredentials: true,
           headers: { "X-CSRFToken": csrftoken },
@@ -147,13 +144,10 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const checkCompanyProfile = async () => {
     try {
-      const response = await axios.get(
-        API_HOST+"/maker/company-details/",
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
-      );
+      const response = await axios.get(API_HOST + "/maker/company-details/", {
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
 
       if (response.data && response.data.company_name) {
         setShowCompanyForm(false);
@@ -172,13 +166,10 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const fetchOpenProjects = async () => {
     try {
-      const response = await axios.get(
-        API_HOST+"/maker/projects/open/",
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
-      );
+      const response = await axios.get(API_HOST + "/maker/projects/open/", {
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
       setOpenProjects(response.data);
     } catch (error) {
       console.error("Failed to fetch open projects", error);
@@ -241,7 +232,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
       }
 
       await axios.post(
-        API_HOST+`/maker/projects/${selectedProject.id}/quotation/`,
+        API_HOST + `/maker/projects/${selectedProject.id}/quotation/`,
         formData,
         {
           withCredentials: true,
@@ -278,7 +269,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     try {
       const csrftoken = Cookies.get("csrftoken");
       await axios.post(
-        API_HOST+"/auth/logout/",
+        API_HOST + "/auth/logout/",
         {},
         {
           withCredentials: true,
@@ -329,7 +320,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     e.preventDefault();
     try {
       await axios.post(
-        API_HOST+"/maker/company-details/",
+        API_HOST + "/maker/company-details/",
         {
           company_name: companyData.companyName,
           year_established: companyData.yearEstablished,

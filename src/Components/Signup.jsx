@@ -48,7 +48,7 @@ const Signup = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+    setErrors({});
     // Reset verification if user edits email or phone after verification
     if (name === "email" && isVerified.email) {
       setIsVerified((prev) => ({ ...prev, email: false }));
@@ -112,7 +112,7 @@ const Signup = () => {
     } catch (error) {
       setErrors({
         submit:
-          error.response?.data?.error ||
+          error.response?.data?.message ||
           "Failed to send OTP. Please try again.",
       });
     }
@@ -150,7 +150,7 @@ const Signup = () => {
     } catch (error) {
       setErrors({
         otp:
-          error.response?.data?.error ||
+          error.response?.data?.message ||
           "Failed to verify OTP. Please try again.",
       });
     }
@@ -192,7 +192,8 @@ const Signup = () => {
     } catch (error) {
       setErrors({
         submit:
-          error.response?.data?.error || "An error occurred. Please try again.",
+          error.response?.data?.message ||
+          "An error occurred. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

@@ -164,8 +164,8 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     try {
       const endpoint =
         forgotPasswordData.method === "email"
-          ? "/auth/send-email-otp/"
-          : "/auth/send-phone-otp/";
+          ? "/auth/forgot-send-email-otp/"
+          : "/auth/forgot-send-phone-otp/";
       const data =
         forgotPasswordData.method === "email"
           ? { email: forgotPasswordData.email }
@@ -197,8 +197,8 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     try {
       const endpoint =
         forgotPasswordData.method === "email"
-          ? "/auth/verify-email-otp/"
-          : "/auth/verify-phone-otp/";
+          ? "/auth/forgot-verify-email-otp/"
+          : "/auth/forgot-verify-phone-otp/";
       const data =
         forgotPasswordData.method === "email"
           ? { email: forgotPasswordData.email, otp: forgotPasswordData.otp }

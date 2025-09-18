@@ -148,6 +148,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     } catch (error) {
       setErrors({
         submit:
+          error.response?.data?.error ||
           error.response?.data?.message ||
           "An error occurred. Please try again.",
       });

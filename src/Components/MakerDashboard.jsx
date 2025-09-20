@@ -12,6 +12,7 @@ import {
   X,
   Upload,
 } from "lucide-react";
+import Footer from "./Footer.jsx";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -773,7 +774,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
       {/* Dashboard Content */}
       <div className="pt-24 md:pt-32 pb-16 px-4 max-w-7xl mx-auto">
-        <section id="dashboard" className="mb-12">
+        <section id="dashboard" className="">
           {userSubscription && userSubscription.plan === "none" && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
               <div className="flex items-center">
@@ -803,7 +804,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
         </section>
 
         {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div className="bg-white rounded-xl shadow-md p-3 mb-6">
           <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
             {/* Search Bar */}
             <div className="flex w-full md:flex-1 items-center space-x-2">
@@ -938,51 +939,101 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       {sameStateProjects.map((project) => (
                         <div
                           key={project.id}
-                          className="border border-green-200 rounded-lg p-4 hover:shadow-md transition duration-300 bg-green-50"
+                          className="rounded-xl p-5 bg-white shadow-md hover:shadow-lg transition duration-300"
                         >
-                          <div className="flex justify-between items-start">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Left Side - Project Details */}
                             <div>
-                              <h3 className="font-medium text-gray-900 mb-1">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                                 {project.name}
                               </h3>
-                              <p className="text-sm text-gray-600 mb-2">
+                              <p className="text-sm text-gray-600 mb-3">
                                 {project.description}
                               </p>
                               <div className="flex flex-wrap gap-2 text-xs">
-                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">
                                   ₹ {project.price}
                                 </span>
-                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md">
                                   Due:{" "}
                                   {new Date(
                                     project.estimatedDate
                                   ).toLocaleDateString("en-GB")}
                                 </span>
-                                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md">
                                   {project.city}, {project.state}
                                 </span>
                               </div>
                             </div>
-                            <button
-                              onClick={() =>
-                                handleCreateQuotationClick(project)
-                              }
-                              disabled={
-                                userSubscription &&
+                            {/* Right Side - Quotations */}
+                            <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-blue-100 border border-indigo-200 p-4">
+                              <h4 className="text-sm font-semibold text-gray-800 mb-3">
+                                Top Quotations
+                              </h4>
+                              <div className="space-y-3">
+                                {project.quotations &&
+                                project.quotations.length > 0 ? (
+                                  project.quotations
+                                    .sort((a, b) => a.price - b.price)
+                                    .slice(0, 3)
+                                    .map((q, index) => (
+                                      <div
+                                        key={index}
+                                        className="text-xs p-2 rounded-md bg-indigo-100/50 flex justify-between items-start"
+                                      >
+                                        {/* Left Side: Price + Description */}
+                                        <div>
+                                          <p className="font-semibold text-indigo-900">
+                                            ₹ {q.price}
+                                          </p>
+                                          <p className="text-gray-500">
+                                            {q.description}
+                                          </p>
+                                        </div>
+
+                                        {/* Right Side: Vendor + Completion */}
+                                        <div className="text-right">
+                                          <p className="text-gray-700">
+                                            Vendor: {q.vendorName}
+                                          </p>
+                                          <p className="text-gray-600">
+                                            Completion:{" "}
+                                            {new Date(
+                                              q.estimated_date
+                                            ).toLocaleDateString("en-GB")}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ))
+                                ) : (
+                                  <p className="text-gray-500 text-xs italic">
+                                    No quotations yet
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Add Quotation Button */}
+                              <button
+                                onClick={() =>
+                                  handleCreateQuotationClick(project)
+                                }
+                                disabled={
+                                  userSubscription &&
+                                  userSubscription.plan === "none"
+                                }
+                                className={`mt-4 w-full px-3 py-2 text-sm font-medium rounded-lg transition duration-300 ${
+                                  userSubscription &&
+                                  userSubscription.plan === "none"
+                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                                }`}
+                              >
+                                {userSubscription &&
                                 userSubscription.plan === "none"
-                              }
-                              className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
-                                userSubscription &&
-                                userSubscription.plan === "none"
-                                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                  : "bg-green-600 text-white hover:bg-green-700"
-                              }`}
-                            >
-                              {userSubscription &&
-                              userSubscription.plan === "none"
-                                ? "Subscribe to Quote"
-                                : "Create Quotation"}
-                            </button>
+                                  ? "Subscribe to Quote"
+                                  : "Add Your Quotation"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1000,51 +1051,95 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                       {otherStateProjects.map((project) => (
                         <div
                           key={project.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-300"
+                          className="rounded-xl p-5 bg-white shadow-md hover:shadow-lg transition duration-300"
                         >
-                          <div className="flex justify-between items-start">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Left Side - Project Details */}
                             <div>
-                              <h3 className="font-medium text-gray-900 mb-1">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                                 {project.name}
                               </h3>
-                              <p className="text-sm text-gray-极速600 mb-2">
+                              <p className="text-sm text-gray-600 mb-3">
                                 {project.description}
                               </p>
                               <div className="flex flex-wrap gap-2 text-xs">
-                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">
                                   ₹ {project.price}
                                 </span>
-                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                                <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md">
                                   Due:{" "}
                                   {new Date(
                                     project.estimatedDate
                                   ).toLocaleDateString("en-GB")}
                                 </span>
-                                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md">
                                   {project.city}, {project.state}
                                 </span>
                               </div>
                             </div>
-                            <button
-                              onClick={() =>
-                                handleCreateQuotationClick(project)
-                              }
-                              disabled={
-                                userSubscription &&
+
+                            {/* Right Side - Quotations */}
+                            <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-blue-100 border border-indigo-200 p-4">
+                              <h4 className="text-sm font-semibold text-gray-800 mb-3">
+                                Top Quotations
+                              </h4>
+                              <div className="space-y-2">
+                                {project.quotations &&
+                                project.quotations.length > 0 ? (
+                                  project.quotations
+                                    .sort((a, b) => a.price - b.price)
+                                    .slice(0, 3)
+                                    .map((q, index) => (
+                                      <div
+                                        key={index}
+                                        className="bg-white p-3 rounded-lg shadow-sm border text-xs hover:shadow-md transition"
+                                      >
+                                        <p className="font-semibold text-gray-900">
+                                          ₹ {q.price}
+                                        </p>
+                                        <p className="text-gray-600">
+                                          Vendor: {q.vendorName}
+                                        </p>
+                                        <p className="text-gray-500">
+                                          Completion:{" "}
+                                          {new Date(
+                                            q.completionDate
+                                          ).toLocaleDateString("en-GB")}
+                                        </p>
+                                        <p className="text-gray-500">
+                                          {q.description}
+                                        </p>
+                                      </div>
+                                    ))
+                                ) : (
+                                  <p className="text-gray-500 text-xs italic">
+                                    No quotations yet
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Add Quotation Button */}
+                              <button
+                                onClick={() =>
+                                  handleCreateQuotationClick(project)
+                                }
+                                disabled={
+                                  userSubscription &&
+                                  userSubscription.plan === "none"
+                                }
+                                className={`mt-4 w-full px-3 py-2 text-sm font-medium rounded-lg transition duration-300 ${
+                                  userSubscription &&
+                                  userSubscription.plan === "none"
+                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                                }`}
+                              >
+                                {userSubscription &&
                                 userSubscription.plan === "none"
-                              }
-                              className={`px-4 py-2 text-sm font-medium rounded-md transition duration-300 whitespace-nowrap ${
-                                userSubscription &&
-                                userSubscription.plan === "none"
-                                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                  : "bg-blue-600 text-white hover:bg-blue-700"
-                              }`}
-                            >
-                              {userSubscription &&
-                              userSubscription.plan === "none"
-                                ? "Subscribe to Quote"
-                                : "Create Quotation"}
-                            </button>
+                                  ? "Subscribe to Quote"
+                                  : "Add Your Quotation"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1350,6 +1445,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

@@ -105,39 +105,57 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const templates = [
     {
       id: 1,
-      name: "Contact Information",
-      description: "Collect contact details from customers",
-      image: "https://dummyimage.com/300x200/4CAF50/ffffff?text=Contact+Form",
-      category: "Business",
+      name: "CNC Milling Project",
+      description:
+        "Create this CNC milling part using high-grade aluminum or mild steel. Keep in mind: maintain tight dimensional tolerances, smooth surface finish, and proper fixturing. Ensure spindle speed and feed rate are optimized to avoid material deformation.",
+      image:
+        "https://images.unsplash.com/photo-1581091215361-6161b6dc3b7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Y25jJTIwbWlsbGluZ3xlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
+      category: "Machining",
     },
     {
       id: 2,
-      name: "RSVP",
-      description: "Event response and attendance tracking",
-      image: "https://dummyimage.com/300x200/2196F3/ffffff?text=RSVP+Form",
-      category: "Events",
+      name: "VMC Machining Job",
+      description:
+        "Create this component using a VMC machine with steel or cast iron. Keep in mind: verify critical dimensions, ensure consistent tool paths, and minimize chatter. Use proper coolant and cutting tools for optimal surface finish.",
+      image:
+        "https://images.unsplash.com/photo-1602537112253-3e0c1421e5b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dm1jJTIwbWFjaGluZXxlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
+      category: "Machining",
     },
     {
       id: 3,
-      name: "Party Invite",
-      description: "Party invitation and guest management",
-      image: "https://dummyimage.com/300x200/FF9800/ffffff?text=Party+Invite",
-      category: "Events",
+      name: "Wirecut / EDM Project",
+      description:
+        "Create this part using Wirecut EDM on hardened steel. Keep in mind: define precise cutting paths, maintain tight tolerances, control spark gap, and use proper dielectric fluid. Ensure high precision for all edges and corners.",
+      image:
+        "https://images.unsplash.com/photo-1599391725516-33d13e9c3fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZWRtJTIwd2lyZWN1dHxlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
+      category: "Machining",
     },
     {
       id: 4,
-      name: "T-Shirt Sign Up",
-      description: "T-shirt order and size collection",
-      image: "https://dummyimage.com/300x200/9C27B0/ffffff?text=T-Shirt+Order",
-      category: "Orders",
+      name: "Laser Cutting Job",
+      description:
+        "Create this component using a laser cutting machine on sheet metal or acrylic. Keep in mind: ensure precise cut paths, maintain clean edges, adjust power and speed settings correctly, and avoid burn marks. Verify part dimensions after cutting.",
+      image:
+        "https://images.unsplash.com/photo-1599058917210-6342e0aa3de5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8bGFzZXIlMjBjdXR0aW5nfGVufDB8fDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400",
+      category: "Machining",
     },
     {
       id: 5,
-      name: "Event Registration",
-      description: "Complete event registration form",
+      name: "Grinding / Finishing Job",
+      description:
+        "Create this part using precision grinding machines for metal finishing. Keep in mind: achieve required surface finish, maintain dimensional accuracy, use correct grinding wheels, and avoid overheating. Inspect thoroughly after grinding.",
       image:
-        "https://dummyimage.com/300x200/795548/ffffff?text=Event+Registration",
-      category: "Events",
+        "https://images.unsplash.com/photo-1603374930075-85115c9056c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JpbmRpbmclMjBtYWNoaW5lcnl8ZW58MHx8MHx8&ixlib=rb-4.0.3&q=80&w=400",
+      category: "Machining",
+    },
+    {
+      id: 6,
+      name: "Hobbing / Gear Manufacturing",
+      description:
+        "Create this gear using hobbing machines with steel or alloy material. Keep in mind: maintain correct module and number of teeth, check pressure angle, ensure surface finish, and avoid backlash. Inspect dimensions carefully before assembly.",
+      image:
+        "https://images.unsplash.com/photo-1596394129035-2e92b6d3d37c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z2VhciUyMG1hY2hpbmVyeXxlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
+      category: "Machining",
     },
   ];
 
@@ -616,6 +634,10 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       onClick={() => {
                         setShowMobileGallery(false);
                         setShowProjectForm(true);
+                        setProjectData((prev) => ({
+                          ...prev,
+                          description: template.description,
+                        }));
                       }}
                     >
                       <h3 className="text-sm font-medium text-gray-900 truncate">

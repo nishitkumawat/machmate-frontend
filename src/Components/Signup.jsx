@@ -23,7 +23,7 @@ const Signup = () => {
   const [otp, setOtp] = useState("");
   const [isVerified, setIsVerified] = useState({
     email: false,
-    phone: false,
+    phone: true,
   });
   const [otpSent, setOtpSent] = useState({
     email: false,
@@ -347,7 +347,7 @@ const Signup = () => {
             {/* Username */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-white mb-1">
-                Username
+                Name
               </label>
               <input
                 type="text"
@@ -409,23 +409,11 @@ const Signup = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className={`flex-grow px-4 py-2 rounded-l-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                    errors.phone ? "border-2 border-red-500" : "border"
+                  className={`w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                    errors.username ? "border-2 border-red-500" : "border"
                   }`}
                   placeholder="Enter your 10-digit phone number"
                 />
-                <button
-                  type="button"
-                  onClick={() => sendOtp("phone")}
-                  disabled={!formData.phone || isVerified.phone}
-                  className={`px-4 py-2 rounded-r-lg ${
-                    isVerified.phone
-                      ? "bg-green-600 text-white"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  } disabled:opacity-50`}
-                >
-                  {isVerified.phone ? "Verified" : "Verify"}
-                </button>
               </div>
               {errors.phone && (
                 <p className="mt-1 text-red-300 text-sm">{errors.phone}</p>

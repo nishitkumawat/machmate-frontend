@@ -11,6 +11,7 @@ import {
   Search,
   X,
   Upload,
+  Settings,
 } from "lucide-react";
 import Footer from "./Footer.jsx";
 
@@ -398,11 +399,26 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+        {/* Rotating gear icon */}
+        <Settings
+          size={60}
+          color="#1e90ff"
+          style={{ animation: "spin 3s linear infinite" }}
+        />
+
+        {/* Loading text */}
+        <p className="mt-4 text-blue-600 text-lg font-medium">
+          Getting Your Site Ready...
+        </p>
+
+        {/* Inline keyframes for spin */}
+        <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
       </div>
     );
   }

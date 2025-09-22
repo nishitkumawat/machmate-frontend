@@ -4,6 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import statesAndCitiesJSON from "../assets/states_and_districts.json";
 import Footer from "./Footer.jsx";
+import { Settings } from "lucide-react"; // gear icon
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -137,16 +138,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       image:
         "https://dummyimage.com/300x200/795548/ffffff?text=Event+Registration",
       category: "Events",
-    },
-  ];
-
-  const recentForms = [
-    {
-      id: 1,
-      name: "BIGBASH BOX CRICKET LEAGUE",
-      lastModified: "Aug 1, 2024",
-      thumbnail:
-        "https://dummyimage.com/200x150/f5f5f5/333333?text=Cricket+League+Form",
     },
   ];
 
@@ -406,11 +397,26 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center transition-opacity duration-500">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+        {/* Rotating gear icon */}
+        <Settings
+          size={60}
+          color="#1e90ff"
+          style={{ animation: "spin 3s linear infinite" }}
+        />
+
+        {/* Loading text */}
+        <p className="mt-4 text-blue-600 text-lg font-medium">
+          Getting Your Site Ready...
+        </p>
+
+        {/* Inline keyframes for spin */}
+        <style>{`
+         @keyframes spin {
+           0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+         }
+       `}</style>
       </div>
     );
   }

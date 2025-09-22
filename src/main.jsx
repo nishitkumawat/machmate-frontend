@@ -1,24 +1,22 @@
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import "./index.css";
 import App from "./App.jsx";
+import "./index.css";
+function Root() {
+  useEffect(() => {
+    // Remove preloader once React is mounted
+    const preloader = document.getElementById("preloader");
+    if (preloader) preloader.remove();
+  }, []);
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>
-);
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .then((reg) => console.log("✅ Service Worker registered:", reg))
-      .catch((err) =>
-        console.error("❌ Service Worker registration failed:", err)
-      );
-  });
+  return (
+    <StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </StrictMode>
+  );
 }
+
+createRoot(document.getElementById("root")).render(<Root />);

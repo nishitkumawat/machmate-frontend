@@ -357,7 +357,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
             </div>
 
             {/* Password */}
-
             <div className="mb-4 relative">
               <label
                 htmlFor="password"

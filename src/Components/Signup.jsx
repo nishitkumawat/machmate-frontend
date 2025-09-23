@@ -160,7 +160,7 @@ const Signup = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    if (!isVerified.email || !isVerified.phone) {
+    if (!isVerified.email) {
       setErrors({
         submit:
           "Please verify both your email and phone number before signing up.",
@@ -187,8 +187,8 @@ const Signup = () => {
         phone: "",
         accountType: "buyer",
       });
-      setIsVerified({ email: false, phone: false });
-      setOtpSent({ email: false, phone: false });
+      setIsVerified({ email: false });
+      setOtpSent({ email: false });
     } catch (error) {
       setErrors({
         submit:
@@ -465,7 +465,7 @@ const Signup = () => {
             {/* Submit */}
             <button
               type="submit"
-              disabled={isSubmitting || !isVerified.email || !isVerified.phone}
+              disabled={isSubmitting || !isVerified.email}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 disabled:opacity-50"
             >
               {isSubmitting ? "Creating Account..." : "Create Account"}

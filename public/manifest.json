@@ -1,7 +1,7 @@
 {
-  "name": "My Web App",
-  "short_name": "WebApp",
-  "description": "A description of my web application",
+  "name": "MachMate",
+  "short_name": "MachMate",
+  "description": "MachMate - Your Ultimate Machining Companion",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

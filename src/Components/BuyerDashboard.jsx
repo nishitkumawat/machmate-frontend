@@ -46,7 +46,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     fetchProjects();
     fetchCompletedOrders();
 
-    setIsLoading(false);
     // Set up scroll spy
     const handleScroll = () => {
       const sections = document.querySelectorAll("section");
@@ -63,102 +62,90 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     };
 
     // Mock projects data
-    setProjects([
-      {
-        id: 1,
-        name: "Custom CNC Parts",
-        description: "Need precision CNC machined parts for automotive project",
-        maxPrice: 15000,
-        estimatedDate: "2024-02-15",
-        pdfUrl: null,
-      },
-      {
-        id: 2,
-        name: "3D Printed Prototypes",
-        description: "Rapid prototyping for product development",
-        maxPrice: 8000,
-        estimatedDate: "2024-02-20",
-        pdfUrl: null,
-      },
-    ]);
+    // setProjects([
+    //   {
+    //     id: 1,
+    //     name: "Custom CNC Parts",
+    //     description: "Need precision CNC machined parts for automotive project",
+    //     maxPrice: 15000,
+    //     estimatedDate: "2024-02-15",
+    //     pdfUrl: null,
+    //   },
+    //   {
+    //     id: 2,
+    //     name: "3D Printed Prototypes",
+    //     description: "Rapid prototyping for product development",
+    //     maxPrice: 8000,
+    //     estimatedDate: "2024-02-20",
+    //     pdfUrl: null,
+    //   },
+    // ]);
 
-    // Mock completed orders
-    setCompletedOrders([
-      {
-        completedId: 1,
-        projectName: "Metal Brackets",
-        projectDescription: "Custom metal brackets for industrial equipment",
-        makerName: "John Smith",
-        makerEmail: "john@example.com",
-        quotationAmount: 12000,
-        quotationMessage: "High quality steel brackets with powder coating",
-        amount: 12000,
-        completionDate: "2024-01-15",
-        report: "https://example.com/report1.pdf",
-      },
-    ]);
+    // // Mock completed orders
+    // setCompletedOrders([
+    //   {
+    //     completedId: 1,
+    //     projectName: "Metal Brackets",
+    //     projectDescription: "Custom metal brackets for industrial equipment",
+    //     makerName: "John Smith",
+    //     makerEmail: "john@example.com",
+    //     quotationAmount: 12000,
+    //     quotationMessage: "High quality steel brackets with powder coating",
+    //     amount: 12000,
+    //     completionDate: "2024-01-15",
+    //     report: "https://example.com/report1.pdf",
+    //   },
+    // ]);
 
+    setIsLoading(false);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const templates = [
-    {
-      id: 1,
-      name: "CNC Milling Project",
-      description:
-        "Create this CNC milling part using high-grade aluminum or mild steel. Keep in mind: maintain tight dimensional tolerances, smooth surface finish, and proper fixturing. Ensure spindle speed and feed rate are optimized to avoid material deformation.",
-      image:
-        "https://images.unsplash.com/photo-1581091215361-6161b6dc3b7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Y25jJTIwbWlsbGluZ3xlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
-      category: "Machining",
-    },
-    {
-      id: 2,
-      name: "VMC Machining Job",
-      description:
-        "Create this component using a VMC machine with steel or cast iron. Keep in mind: verify critical dimensions, ensure consistent tool paths, and minimize chatter. Use proper coolant and cutting tools for optimal surface finish.",
-      image:
-        "https://images.unsplash.com/photo-1602537112253-3e0c1421e5b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dm1jJTIwbWFjaGluZXxlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
-      category: "Machining",
-    },
-    {
-      id: 3,
-      name: "Wirecut / EDM Project",
-      description:
-        "Create this part using Wirecut EDM on hardened steel. Keep in mind: define precise cutting paths, maintain tight tolerances, control spark gap, and use proper dielectric fluid. Ensure high precision for all edges and corners.",
-      image:
-        "https://images.unsplash.com/photo-1599391725516-33d13e9c3fbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZWRtJTIwd2lyZWN1dHxlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
-      category: "Machining",
-    },
-    {
-      id: 4,
-      name: "Laser Cutting Job",
-      description:
-        "Create this component using a laser cutting machine on sheet metal or acrylic. Keep in mind: ensure precise cut paths, maintain clean edges, adjust power and speed settings correctly, and avoid burn marks. Verify part dimensions after cutting.",
-      image:
-        "https://images.unsplash.com/photo-1599058917210-6342e0aa3de5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8bGFzZXIlMjBjdXR0aW5nfGVufDB8fDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400",
-      category: "Machining",
-    },
-    {
-      id: 5,
-      name: "Grinding / Finishing Job",
-      description:
-        "Create this part using precision grinding machines for metal finishing. Keep in mind: achieve required surface finish, maintain dimensional accuracy, use correct grinding wheels, and avoid overheating. Inspect thoroughly after grinding.",
-      image:
-        "https://images.unsplash.com/photo-1603374930075-85115c9056c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JpbmRpbmclMjBtYWNoaW5lcnl8ZW58MHx8MHx8&ixlib=rb-4.0.3&q=80&w=400",
-      category: "Machining",
-    },
-    {
-      id: 6,
-      name: "Hobbing / Gear Manufacturing",
-      description:
-        "Create this gear using hobbing machines with steel or alloy material. Keep in mind: maintain correct module and number of teeth, check pressure angle, ensure surface finish, and avoid backlash. Inspect dimensions carefully before assembly.",
-      image:
-        "https://images.unsplash.com/photo-1596394129035-2e92b6d3d37c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Z2VhciUyMG1hY2hpbmVyeXxlbnwwfHwwfHw%3D&ixlib=rb-4.0.3&q=80&w=400",
-      category: "Machining",
-    },
-  ];
-
+ const templates = [
+  {
+    id: 1,
+    name: "CNC Milling Project",
+    description: "Create this CNC milling part using high-grade aluminum or mild steel. Keep in mind: maintain tight dimensional tolerances, smooth surface finish, and proper fixturing. Ensure spindle speed and feed rate are optimized to avoid material deformation.",
+    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+    category: "Machining",
+  },
+  {
+    id: 2,
+    name: "VMC Machining Job",
+    description: "Create this component using a VMC machine with steel or cast iron. Keep in mind: verify critical dimensions, ensure consistent tool paths, and minimize chatter. Use proper coolant and cutting tools for optimal surface finish.",
+    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+    category: "Machining",
+  },
+  {
+    id: 3,
+    name: "Wirecut / EDM Project",
+    description: "Create this part using Wirecut EDM on hardened steel. Keep in mind: define precise cutting paths, maintain tight tolerances, control spark gap, and use proper dielectric fluid. Ensure high precision for all edges and corners.",
+    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+    category: "Machining",
+  },
+  {
+    id: 4,
+    name: "Laser Cutting Job",
+    description: "Create this component using a laser cutting machine on sheet metal or acrylic. Keep in mind: ensure precise cut paths, maintain clean edges, adjust power and speed settings correctly, and avoid burn marks. Verify part dimensions after cutting.",
+    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+    category: "Machining",
+  },
+  {
+    id: 5,
+    name: "Grinding / Finishing Job",
+    description: "Create this part using precision grinding machines for metal finishing. Keep in mind: achieve required surface finish, maintain dimensional accuracy, use correct grinding wheels, and avoid overheating. Inspect thoroughly after grinding.",
+    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+    category: "Machining",
+  },
+  {
+    id: 6,
+    name: "Hobbing / Gear Manufacturing",
+    description: "Create this gear using hobbing machines with steel or alloy material. Keep in mind: maintain correct module and number of teeth, check pressure angle, ensure surface finish, and avoid backlash. Inspect dimensions carefully before assembly.",
+    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+    category: "Machining",
+  },
+];
   const fetchProjects = async () => {
     try {
       const response = await axios.get(API_HOST + "/buyer/projects/", {

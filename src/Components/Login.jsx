@@ -1,15 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Smartphone,
+  ArrowLeft,
+  CheckCircle,
+} from "lucide-react";
 import machmateLogo from "../assets/logo-dark.png";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 const Login = ({ setIsAuthenticated, setUserRole }) => {
   const [showPassword, setShowPassword] = useState(false);
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -51,7 +57,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
       setForgotPasswordErrors({ ...forgotPasswordErrors, [name]: "" });
   };
 
-  // ✅ Login form validation
   const validateForm = () => {
     const newErrors = {};
     if (!formData.email.trim()) newErrors.email = "Email is required";
@@ -60,7 +65,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Forgot password step validations
   const validateForgotPasswordStep1 = () => {
     const newErrors = {};
     if (forgotPasswordData.method === "email") {
@@ -115,7 +119,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Handle login
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -157,7 +160,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     }
   };
 
-  // ✅ Send OTP
   const handleSendOtp = async () => {
     if (!validateForgotPasswordStep1()) return;
     setIsSendingOtp(true);
@@ -190,7 +192,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     }
   };
 
-  // ✅ Verify OTP
   const handleVerifyOtp = async () => {
     if (!validateForgotPasswordStep2()) return;
     setIsVerifyingOtp(true);
@@ -221,7 +222,6 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
     }
   };
 
-  // ✅ Reset password
   const handleResetPassword = async () => {
     if (!validateForgotPasswordStep3()) return;
     setIsResettingPassword(true);
@@ -283,200 +283,251 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
   };
 
   return (
-    <div>
-      <nav className="bg-white/20 backdrop-blur-md shadow-md fixed w-full z-50 h-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+      {/* Navbar */}
+      <nav className="bg-white/10 backdrop-blur-md shadow-lg fixed w-full z-50 h-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex justify-between items-center h-full">
-            {/* Clickable logo + name using navigate */}
             <div
-              className="flex items-center flex-shrink-0 cursor-pointer"
+              className="flex items-center flex-shrink-0 cursor-pointer group"
               onClick={() => navigate("/")}
             >
               <img
                 src={machmateLogo}
                 alt="MachMate Logo"
-                className="h-8 w-8 mr-2 object-contain"
+                className="h-10 w-10 mr-3 object-contain transition-transform duration-300 group-hover:scale-110"
               />
-              <span className="text-lg font-bold text-blue-600">MachMate</span>
+              <span className="text-xl font-bold text-white drop-shadow-lg">
+                MachMate
+              </span>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="relative min-h-screen flex items-center justify-center">
-        {/* Background */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1503387762-592deb58ef4e')",
-          }}
-        >
-          <div className="absolute inset-0 bg-black/60"></div>
-        </div>
-
-        {/* Login Card */}
-        <div className="relative z-10 max-w-md w-full bg-white/20 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/30">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
-            <p className="text-blue-100 mt-2">
-              Sign in to your <span className="font-semibold">MachMate</span>{" "}
-              account
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            {errors.submit && (
-              <div className="mb-4 bg-red-500/20 border border-red-400 text-red-200 px-4 py-2 rounded">
-                {errors.submit}
+      {/* Main Content */}
+      <div className="pt-16 min-h-screen flex">
+        {/* Left Side - Information (Desktop only) */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
+          <div className="max-w-md text-white backdrop-blur-sm bg-white/10 rounded-3xl p-8 shadow-2xl border border-white/20">
+            <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-200 to-indigo-200 bg-clip-text text-transparent">
+              Welcome to MachMate
+            </h1>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-6 w-6 text-green-300 mt-1 flex-shrink-0" />
+                <p className="text-blue-100 text-lg">
+                  Streamline your manufacturing processes with intelligent
+                  solutions
+                </p>
               </div>
-            )}
-
-            {/* Email */}
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-white mb-1"
-              >
-                Email
-              </label>
-              <input
-                type="text"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  errors.email ? "border-2 border-red-500" : "border"
-                }`}
-                placeholder="Enter your email"
-              />
-              {errors.email && (
-                <p className="mt-1 text-red-300 text-sm">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="mb-4 relative">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-white mb-1"
-              >
-                Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 pr-10 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  errors.password ? "border-2 border-red-500" : "border"
-                }`}
-                placeholder="Enter your password"
-              />
-
-              {/* 👁️ Toggle Button with Lucide */}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-gray-600 hover:text-gray-800"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-
-              {errors.password && (
-                <p className="mt-1 text-red-300 text-sm">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Remember me and Forgot Password */}
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-500 rounded"
-                />
-                <label htmlFor="rememberMe" className="ml-2 text-white">
-                  Remember me
-                </label>
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-6 w-6 text-green-300 mt-1 flex-shrink-0" />
+                <p className="text-blue-100 text-lg">
+                  Connect with suppliers and manufacturers seamlessly
+                </p>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setShowForgotPassword(true)}
-                className="text-blue-300 hover:text-blue-500 text-sm font-medium"
-              >
-                Forgot Password?
-              </button>
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-6 w-6 text-green-300 mt-1 flex-shrink-0" />
+                <p className="text-blue-100 text-lg">
+                  Real-time tracking and analytics for your business
+                </p>
+              </div>
             </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 disabled:opacity-50"
-            >
-              {isSubmitting ? "Signing In..." : "Sign In"}
-            </button>
-
-            <div className="mt-6 text-center">
-              <p className="text-gray-200">
-                Don't have an account?{" "}
-                <Link
-                  to="/signup"
-                  className="text-blue-300 hover:text-blue-500 font-medium"
-                >
-                  Create one
-                </Link>
+            <div className="mt-8 p-4 bg-white/10 rounded-xl border border-white/20">
+              <p className="text-blue-200 italic">
+                "MachMate transformed how we manage our manufacturing workflow.
+                Efficiency increased by 40%!"
               </p>
             </div>
-          </form>
+          </div>
+        </div>
+
+        {/* Right Side - Login Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
+          {/* Changed background to white and text to blue */}
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-200 p-8 lg:p-10 transition-all duration-300 hover:shadow-xl">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-blue-800 mb-2">
+                Welcome Back
+              </h2>
+              <p className="text-blue-600">
+                Sign in to continue your journey with MachMate
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {errors.submit && (
+                <div className="bg-red-500/20 border border-red-400/50 text-red-700 px-4 py-3 rounded-xl backdrop-blur-sm">
+                  {errors.submit}
+                </div>
+              )}
+
+              {/* Email Field */}
+              <div className="group">
+                <div className="flex items-center space-x-3 mb-2">
+                  <Mail className="h-5 w-5 text-blue-600 transition-colors duration-300 group-hover:text-blue-800" />
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium text-blue-800"
+                  >
+                    Email Address
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                    placeholder="Enter your email"
+                  />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
+                {errors.email && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.email}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Password Field */}
+              <div className="group">
+                <div className="flex items-center space-x-3 mb-2">
+                  <Lock className="h-5 w-5 text-blue-600 transition-colors duration-300 group-hover:text-blue-800" />
+                  <label
+                    htmlFor="password"
+                    className="text-sm font-medium text-blue-800"
+                  >
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 pr-10 transition-all duration-300 focus:placeholder-transparent"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-800 transition-colors duration-300 p-1 rounded-full hover:bg-blue-50"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
+                {errors.password && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.password}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center space-x-2 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      name="rememberMe"
+                      checked={formData.rememberMe}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-5 h-5 border-2 rounded border-blue-500 transition-all duration-300 group-hover:border-blue-700 ${
+                        formData.rememberMe ? "bg-blue-500 border-blue-500" : ""
+                      }`}
+                    >
+                      {formData.rememberMe && (
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                          ✓
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-blue-800 text-sm transition-colors duration-300 group-hover:text-blue-600">
+                    Remember me
+                  </span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-300 underline decoration-transparent hover:decoration-blue-800"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+
+              {/* Sign Up Link */}
+              <div className="text-center pt-4">
+                <p className="text-blue-600">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/signup"
+                    className="text-blue-800 hover:text-blue-600 font-medium underline decoration-transparent hover:decoration-blue-600 transition-all duration-300"
+                  >
+                    Create one
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 
       {/* Forgot Password Modal */}
       {showForgotPassword && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">
-                Reset Password
-              </h3>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-6">
               <button
                 onClick={resetForgotPasswordFlow}
-                className="text-gray-500 hover:text-gray-700"
+                className="p-2 rounded-full hover:bg-blue-50 transition-colors duration-300 text-blue-800"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <ArrowLeft size={20} />
               </button>
+              <h3 className="text-xl font-bold text-blue-800 text-center flex-1 mr-8">
+                Reset Password
+              </h3>
             </div>
 
             {forgotPasswordErrors.submit && (
-              <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded">
+              <div className="mb-4 bg-red-500/20 border border-red-400/50 text-red-700 px-4 py-3 rounded-xl">
                 {forgotPasswordErrors.submit}
               </div>
             )}
 
             {forgotPasswordData.step === 1 && (
               <>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-blue-800 mb-4">
                     How would you like to reset your password?
                   </label>
                   <div className="flex space-x-4">
@@ -488,67 +539,75 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
                           method: "email",
                         })
                       }
-                      className={`flex-1 py-2 px-4 rounded-lg border ${
+                      className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
                         forgotPasswordData.method === "email"
-                          ? "bg-blue-100 border-blue-500 text-blue-700"
-                          : "bg-gray-100 border-gray-300 text-gray-700"
+                          ? "bg-blue-500/20 border-blue-400 text-blue-800 shadow-lg"
+                          : "bg-gray-100 border-gray-300 text-blue-600 hover:border-blue-400"
                       }`}
                     >
+                      <Mail className="h-5 w-5 mx-auto mb-1" />
                       Email
                     </button>
+                    {/* <button
+                      type="button"
+                      onClick={() =>
+                        setForgotPasswordData({
+                          ...forgotPasswordData,
+                          method: "phone",
+                        })
+                      }
+                      className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
+                        forgotPasswordData.method === "phone"
+                          ? "bg-blue-500/20 border-blue-400 text-blue-800 shadow-lg"
+                          : "bg-gray-100 border-gray-300 text-blue-600 hover:border-blue-400"
+                      }`}
+                    >
+                      <Smartphone className="h-5 w-5 mx-auto mb-1" />
+                      Phone
+                    </button> */}
                   </div>
                 </div>
 
                 {forgotPasswordData.method === "email" ? (
-                  <div className="mb-4">
-                    <label
-                      htmlFor="forgot-email"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Email Address
-                    </label>
+                  <div className="mb-6 group">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Mail className="h-5 w-5 text-blue-600" />
+                      <label className="text-sm font-medium text-blue-800">
+                        Email Address
+                      </label>
+                    </div>
                     <input
                       type="email"
-                      id="forgot-email"
                       name="email"
                       value={forgotPasswordData.email}
                       onChange={handleForgotPasswordChange}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        forgotPasswordErrors.email
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                      className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300"
                       placeholder="Enter your email address"
                     />
                     {forgotPasswordErrors.email && (
-                      <p className="mt-1 text-red-500 text-sm">
+                      <p className="mt-2 text-red-600 text-sm">
                         {forgotPasswordErrors.email}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <div className="mb-4">
-                    <label
-                      htmlFor="forgot-phone"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Phone Number
-                    </label>
+                  <div className="mb-6 group">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Smartphone className="h-5 w-5 text-blue-600" />
+                      <label className="text-sm font-medium text-blue-800">
+                        Phone Number
+                      </label>
+                    </div>
                     <input
                       type="tel"
-                      id="forgot-phone"
                       name="phone"
                       value={forgotPasswordData.phone}
                       onChange={handleForgotPasswordChange}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        forgotPasswordErrors.phone
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                      className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300"
                       placeholder="Enter your phone number"
                     />
                     {forgotPasswordErrors.phone && (
-                      <p className="mt-1 text-red-500 text-sm">
+                      <p className="mt-2 text-red-600 text-sm">
                         {forgotPasswordErrors.phone}
                       </p>
                     )}
@@ -559,7 +618,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={isSendingOtp}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 disabled:opacity-50"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50"
                 >
                   {isSendingOtp ? "Sending..." : "Send Verification Code"}
                 </button>
@@ -568,36 +627,30 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
 
             {forgotPasswordData.step === 2 && (
               <>
-                <div className="mb-4">
-                  <p className="text-gray-600 mb-4">
+                <div className="mb-6">
+                  <p className="text-blue-600 mb-4 text-center">
                     We've sent a 6-digit verification code to your{" "}
-                    {forgotPasswordData.method}. Please enter it below.
+                    {forgotPasswordData.method}
                   </p>
-                  <label
-                    htmlFor="otp"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Verification Code
-                  </label>
-                  <input
-                    type="text"
-                    id="otp"
-                    name="otp"
-                    value={forgotPasswordData.otp}
-                    onChange={handleForgotPasswordChange}
-                    className={`w-full px-4 py-2 rounded-lg border ${
-                      forgotPasswordErrors.otp
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-400`}
-                    placeholder="Enter 6-digit code"
-                    maxLength="6"
-                  />
-                  {forgotPasswordErrors.otp && (
-                    <p className="mt-1 text-red-500 text-sm">
-                      {forgotPasswordErrors.otp}
-                    </p>
-                  )}
+                  <div className="group">
+                    <label className="block text-sm font-medium text-blue-800 mb-2">
+                      Verification Code
+                    </label>
+                    <input
+                      type="text"
+                      name="otp"
+                      value={forgotPasswordData.otp}
+                      onChange={handleForgotPasswordChange}
+                      className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 text-center text-xl tracking-widest"
+                      placeholder="XXXXXX"
+                      maxLength="6"
+                    />
+                    {forgotPasswordErrors.otp && (
+                      <p className="mt-2 text-red-600 text-sm">
+                        {forgotPasswordErrors.otp}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex space-x-4">
@@ -606,7 +659,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
                     onClick={() =>
                       setForgotPasswordData({ ...forgotPasswordData, step: 1 })
                     }
-                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300"
+                    className="flex-1 bg-gray-100 text-blue-800 py-3 px-4 rounded-xl hover:bg-gray-200 transition-all duration-300 border border-gray-300"
                   >
                     Back
                   </button>
@@ -614,7 +667,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={isVerifyingOtp}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 disabled:opacity-50"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50"
                   >
                     {isVerifyingOtp ? "Verifying..." : "Verify Code"}
                   </button>
@@ -624,60 +677,50 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
 
             {forgotPasswordData.step === 3 && (
               <>
-                <div className="mb-4">
-                  <p className="text-gray-600 mb-4">
-                    Please enter your new password below.
+                <div className="mb-6">
+                  <p className="text-blue-600 mb-4 text-center">
+                    Create your new password
                   </p>
 
-                  <div className="mb-4">
-                    <label
-                      htmlFor="newPassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      New Password
-                    </label>
+                  <div className="group mb-4">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Lock className="h-5 w-5 text-blue-600" />
+                      <label className="text-sm font-medium text-blue-800">
+                        New Password
+                      </label>
+                    </div>
                     <input
                       type="password"
-                      id="newPassword"
                       name="newPassword"
                       value={forgotPasswordData.newPassword}
                       onChange={handleForgotPasswordChange}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        forgotPasswordErrors.newPassword
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                      className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300"
                       placeholder="Enter new password"
                     />
                     {forgotPasswordErrors.newPassword && (
-                      <p className="mt-1 text-red-500 text-sm">
+                      <p className="mt-2 text-red-600 text-sm">
                         {forgotPasswordErrors.newPassword}
                       </p>
                     )}
                   </div>
 
-                  <div className="mb-4">
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Confirm Password
-                    </label>
+                  <div className="group">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Lock className="h-5 w-5 text-blue-600" />
+                      <label className="text-sm font-medium text-blue-800">
+                        Confirm Password
+                      </label>
+                    </div>
                     <input
                       type="password"
-                      id="confirmPassword"
                       name="confirmPassword"
                       value={forgotPasswordData.confirmPassword}
                       onChange={handleForgotPasswordChange}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        forgotPasswordErrors.confirmPassword
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-400`}
+                      className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300"
                       placeholder="Confirm new password"
                     />
                     {forgotPasswordErrors.confirmPassword && (
-                      <p className="mt-1 text-red-500 text-sm">
+                      <p className="mt-2 text-red-600 text-sm">
                         {forgotPasswordErrors.confirmPassword}
                       </p>
                     )}
@@ -690,7 +733,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
                     onClick={() =>
                       setForgotPasswordData({ ...forgotPasswordData, step: 2 })
                     }
-                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300"
+                    className="flex-1 bg-gray-100 text-blue-800 py-3 px-4 rounded-xl hover:bg-gray-200 transition-all duration-300 border border-gray-300"
                   >
                     Back
                   </button>
@@ -698,7 +741,7 @@ const Login = ({ setIsAuthenticated, setUserRole }) => {
                     type="button"
                     onClick={handleResetPassword}
                     disabled={isResettingPassword}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 disabled:opacity-50"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50"
                   >
                     {isResettingPassword ? "Resetting..." : "Reset Password"}
                   </button>

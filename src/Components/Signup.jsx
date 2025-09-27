@@ -15,6 +15,7 @@ const Signup = () => {
     confirmPassword: "",
     phone: "",
     accountType: "buyer",
+    acceptTerms: false,
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +48,7 @@ const Signup = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setErrors({});
     // Reset verification if user edits email or phone after verification
     if (name === "email" && isVerified.email) {
@@ -57,7 +58,10 @@ const Signup = () => {
       setIsVerified((prev) => ({ ...prev, phone: false }));
     }
 
-    setFormData({ ...formData, [name]: value });
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
 
     if (errors[name]) setErrors({ ...errors, [name]: "" });
   };
@@ -85,6 +89,10 @@ const Signup = () => {
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
     else if (!/^\d{10}$/.test(formData.phone))
       newErrors.phone = "Phone must be 10 digits";
+
+    if (!formData.acceptTerms)
+      newErrors.acceptTerms =
+        "You must accept the Terms and Conditions and Privacy Policy";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -186,6 +194,7 @@ const Signup = () => {
         confirmPassword: "",
         phone: "",
         accountType: "buyer",
+        acceptTerms: false,
       });
       setIsVerified({ email: false });
       setOtpSent({ email: false });
@@ -202,289 +211,452 @@ const Signup = () => {
   };
 
   return (
-    <div>
-      <nav className="bg-white/20 backdrop-blur-md shadow-md fixed w-full z-50 h-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+      {/* Navbar */}
+      <nav className="bg-white/10 backdrop-blur-md shadow-lg fixed w-full z-50 h-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex justify-between items-center h-full">
             <div
-              className="flex items-center flex-shrink-0 cursor-pointer"
+              className="flex items-center flex-shrink-0 cursor-pointer group"
               onClick={() => navigate("/")}
             >
               <img
                 src={machmateLogo}
                 alt="MachMate Logo"
-                className="h-8 w-8 mr-2 object-contain"
+                className="h-10 w-10 mr-3 object-contain transition-transform duration-300 group-hover:scale-110"
               />
-              <span className="text-lg font-bold text-blue-600">MachMate</span>
+              <span className="text-xl font-bold text-white drop-shadow-lg">
+                MachMate
+              </span>
             </div>
           </div>
         </div>
       </nav>
-      <div className="relative min-h-screen flex flex-col justify-center items-center py-20">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1503387762-592deb58ef4e')",
-          }}
-        >
-          <div className="absolute inset-0 bg-black/60"></div>
+
+      {/* Main Content */}
+      <div className="pt-16 min-h-screen flex">
+        {/* Left Side - Information (Desktop only) */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
+          <div className="max-w-md text-white backdrop-blur-sm bg-white/10 rounded-3xl p-8 shadow-2xl border border-white/20">
+            <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-200 to-indigo-200 bg-clip-text text-transparent">
+              Join MachMate Today
+            </h1>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+                <p className="text-blue-100 text-lg">
+                  Connect with manufacturers and suppliers worldwide
+                </p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+                <p className="text-blue-100 text-lg">
+                  Streamline your manufacturing workflow
+                </p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+                <p className="text-blue-100 text-lg">
+                  Real-time analytics and tracking
+                </p>
+              </div>
+            </div>
+            <div className="mt-8 p-4 bg-white/10 rounded-xl border border-white/20">
+              <p className="text-blue-200 italic">
+                "MachMate helped us grow our manufacturing business by 60% in
+                just 6 months!"
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* OTP Modal */}
-        {verificationModal && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-96">
-              <h3 className="text-xl font-semibold mb-4">
+        {/* Right Side - Signup Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-200 p-8 lg:p-10 transition-all duration-300 hover:shadow-xl">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-blue-800 mb-2">
+                Create Your Account
+              </h2>
+              <p className="text-blue-600">
+                Join MachMate and transform your manufacturing journey
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              {errors.submit && (
+                <div className="mb-4 bg-red-500/20 border border-red-400/50 text-red-700 px-4 py-3 rounded-xl">
+                  {errors.submit}
+                </div>
+              )}
+              {successMessage && (
+                <div className="mb-4 bg-green-500/20 border border-green-400/50 text-green-700 px-4 py-3 rounded-xl">
+                  {successMessage}
+                </div>
+              )}
+
+              {/* Account Type */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-blue-800 mb-3">
+                  I am a:
+                </label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center text-blue-800 cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="radio"
+                        name="accountType"
+                        value="buyer"
+                        checked={formData.accountType === "buyer"}
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-5 h-5 border-2 rounded-full border-blue-500 transition-all duration-300 group-hover:border-blue-700 ${
+                          formData.accountType === "buyer"
+                            ? "bg-blue-500 border-blue-500"
+                            : ""
+                        }`}
+                      >
+                        {formData.accountType === "buyer" && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="ml-2 text-blue-800">Work Seeker</span>
+                  </label>
+                  <label className="flex items-center text-blue-800 cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="radio"
+                        name="accountType"
+                        value="maker"
+                        checked={formData.accountType === "maker"}
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-5 h-5 border-2 rounded-full border-blue-500 transition-all duration-300 group-hover:border-blue-700 ${
+                          formData.accountType === "maker"
+                            ? "bg-blue-500 border-blue-500"
+                            : ""
+                        }`}
+                      >
+                        {formData.accountType === "maker" && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="ml-2 text-blue-800">Machine Owner</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Username */}
+              <div className="mb-6 group">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                    placeholder="Enter your full name"
+                  />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
+                {errors.username && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.username}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="mb-6 group">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  Email Address
+                </label>
+                <div className="flex space-x-2">
+                  <div className="flex-1 relative">
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                      placeholder="Enter your email"
+                    />
+                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => sendOtp("email")}
+                    disabled={!formData.email || isVerified.email}
+                    className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 border-2 ${
+                      isVerified.email
+                        ? "bg-green-500 text-white border-green-500"
+                        : "bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {isVerified.email ? "Verified" : "Verify"}
+                  </button>
+                </div>
+                {errors.email && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.email}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div className="mb-6 group">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                    placeholder="Enter your 10-digit phone number"
+                  />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
+                {errors.phone && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.phone}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div className="mb-6 group">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                    placeholder="Enter your password"
+                  />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
+                {errors.password && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.password}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="mb-6 group">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                    placeholder="Confirm your password"
+                  />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.confirmPassword}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Terms and Conditions */}
+              <div className="mb-6">
+                <label className="flex items-start space-x-3 cursor-pointer group">
+                  <div className="relative mt-1">
+                    <input
+                      type="checkbox"
+                      name="acceptTerms"
+                      checked={formData.acceptTerms}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-5 h-5 border-2 rounded border-blue-500 transition-all duration-300 group-hover:border-blue-700 ${
+                        formData.acceptTerms
+                          ? "bg-blue-500 border-blue-500"
+                          : ""
+                      }`}
+                    >
+                      {formData.acceptTerms && (
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                          ✓
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-blue-800 text-sm transition-colors duration-300 group-hover:text-blue-600">
+                    I agree to the{" "}
+                    <Link
+                      to="/terms"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Terms and Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      to="/privacy"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+                {errors.acceptTerms && (
+                  <p className="mt-2 text-red-600 text-sm flex items-center space-x-1">
+                    <span>•</span>
+                    <span>{errors.acceptTerms}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting || !isVerified.email}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-blue-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating Account...</span>
+                  </div>
+                ) : (
+                  "Create Account"
+                )}
+              </button>
+
+              {/* Login Link */}
+              <div className="text-center pt-4">
+                <p className="text-blue-600">
+                  Already have an account?{" "}
+                  <Link
+                    to="/login"
+                    className="text-blue-800 hover:text-blue-600 font-medium underline decoration-transparent hover:decoration-blue-600 transition-all duration-300"
+                  >
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* OTP Modal */}
+      {verificationModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-blue-800">
                 Verify {verificationModal === "email" ? "Email" : "Phone"}
               </h3>
-              <p className="mb-4">
-                {verificationModal === "email"
-                  ? `Enter the 6-digit code sent to ${formData.email}`
-                  : `Enter the code 123456 for demo (would be sent to ${formData.phone})`}
-              </p>
+              <button
+                onClick={() => {
+                  setVerificationModal(null);
+                  setOtp("");
+                  setErrors({});
+                }}
+                className="p-2 rounded-full hover:bg-blue-50 transition-colors duration-300 text-blue-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-blue-600 mb-4">
+              {verificationModal === "email"
+                ? `Enter the 6-digit code sent to ${formData.email}`
+                : `Enter the code 123456 for demo (would be sent to ${formData.phone})`}
+            </p>
+
+            <div className="mb-4 group">
               <input
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder="Enter OTP"
-                className="w-full px-4 py-2 border rounded-lg mb-4"
+                className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 text-center text-xl tracking-widest"
+                maxLength="6"
               />
               {errors.otp && (
-                <p className="text-red-500 text-sm mb-4">{errors.otp}</p>
-              )}
-              <div className="flex justify-between">
-                <button
-                  onClick={() => {
-                    setVerificationModal(null);
-                    setOtp("");
-                    setErrors({});
-                  }}
-                  className="px-4 py-2 bg-gray-300 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={verifyOtp}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-                >
-                  Verify
-                </button>
-              </div>
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => sendOtp(verificationModal)}
-                  disabled={resendTimer[verificationModal] > 0}
-                  className={`${
-                    resendTimer[verificationModal] > 0
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-600 hover:underline"
-                  }`}
-                >
-                  {resendTimer[verificationModal] > 0
-                    ? `Resend in ${resendTimer[verificationModal]}s`
-                    : "Resend OTP"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Signup Card */}
-        <div className="relative z-10 max-w-md w-full bg-white/20 backdrop-blur-md rounded-2xl shadow-2xl p-10 border border-white/30">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-white">
-              Create Your Account
-            </h2>
-            <p className="text-blue-100 mt-2">
-              Join <span className="font-semibold">MachMate</span> today
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            {errors.submit && (
-              <div className="mb-4 bg-red-500/20 border border-red-400 text-red-200 px-4 py-2 rounded">
-                {errors.submit}
-              </div>
-            )}
-            {successMessage && (
-              <div className="mb-4 bg-green-500/20 border border-green-400 text-green-200 px-4 py-2 rounded">
-                {successMessage}
-              </div>
-            )}
-
-            {/* Account Type */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-1">
-                I am a:
-              </label>
-              <div className="flex space-x-4">
-                <label className="flex items-center text-white">
-                  <input
-                    type="radio"
-                    name="accountType"
-                    value="buyer"
-                    checked={formData.accountType === "buyer"}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-blue-400"
-                  />
-                  <span className="ml-2">Work Seeker</span>
-                </label>
-                <label className="flex items-center text-white">
-                  <input
-                    type="radio"
-                    name="accountType"
-                    value="maker"
-                    checked={formData.accountType === "maker"}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-blue-400"
-                  />
-                  <span className="ml-2">Machine Owner</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Username */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  errors.username ? "border-2 border-red-500" : "border"
-                }`}
-                placeholder="Enter your username"
-              />
-              {errors.username && (
-                <p className="mt-1 text-red-300 text-sm">{errors.username}</p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-1">
-                Email
-              </label>
-              <div className="flex">
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`flex-grow px-4 py-2 rounded-l-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                    errors.email ? "border-2 border-red-500" : "border"
-                  }`}
-                  placeholder="Enter your email"
-                />
-                <button
-                  type="button"
-                  onClick={() => sendOtp("email")}
-                  disabled={!formData.email || isVerified.email}
-                  className={`px-4 py-2 rounded-r-lg ${
-                    isVerified.email
-                      ? "bg-green-600 text-white"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  } disabled:opacity-50`}
-                >
-                  {isVerified.email ? "Verified" : "Verify"}
-                </button>
-              </div>
-              {errors.email && (
-                <p className="mt-1 text-red-300 text-sm">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-1">
-                Phone Number
-              </label>
-              <div className="flex">
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                    errors.username ? "border-2 border-red-500" : "border"
-                  }`}
-                  placeholder="Enter your 10-digit phone number"
-                />
-              </div>
-              {errors.phone && (
-                <p className="mt-1 text-red-300 text-sm">{errors.phone}</p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  errors.password ? "border-2 border-red-500" : "border"
-                }`}
-                placeholder="Enter your password"
-              />
-              {errors.password && (
-                <p className="mt-1 text-red-300 text-sm">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-white mb-1">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                  errors.confirmPassword ? "border-2 border-red-500" : "border"
-                }`}
-                placeholder="Confirm your password"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-red-300 text-sm">
-                  {errors.confirmPassword}
+                <p className="mt-2 text-red-600 text-sm text-center">
+                  {errors.otp}
                 </p>
               )}
             </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isSubmitting || !isVerified.email}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 disabled:opacity-50"
-            >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
-            </button>
-
-            <div className="mt-6 text-center">
-              <p className="text-gray-200">
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="text-blue-300 hover:text-blue-500 font-medium"
-                >
-                  Sign in
-                </Link>
-              </p>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => {
+                  setVerificationModal(null);
+                  setOtp("");
+                  setErrors({});
+                }}
+                className="flex-1 bg-gray-100 text-blue-800 py-3 px-4 rounded-xl hover:bg-gray-200 transition-all duration-300 border border-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={verifyOtp}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300"
+              >
+                Verify
+              </button>
             </div>
-          </form>
+
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => sendOtp(verificationModal)}
+                disabled={resendTimer[verificationModal] > 0}
+                className={`text-blue-600 hover:text-blue-800 transition-colors duration-300 ${
+                  resendTimer[verificationModal] > 0
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "hover:underline"
+                }`}
+              >
+                {resendTimer[verificationModal] > 0
+                  ? `Resend in ${resendTimer[verificationModal]}s`
+                  : "Resend OTP"}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

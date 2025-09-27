@@ -102,50 +102,71 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
- const templates = [
-  {
-    id: 1,
-    name: "CNC Milling Project",
-    description: "Create this CNC milling part using high-grade aluminum or mild steel. Keep in mind: maintain tight dimensional tolerances, smooth surface finish, and proper fixturing. Ensure spindle speed and feed rate are optimized to avoid material deformation.",
-    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
-    category: "Machining",
-  },
-  {
-    id: 2,
-    name: "VMC Machining Job",
-    description: "Create this component using a VMC machine with steel or cast iron. Keep in mind: verify critical dimensions, ensure consistent tool paths, and minimize chatter. Use proper coolant and cutting tools for optimal surface finish.",
-    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
-    category: "Machining",
-  },
-  {
-    id: 3,
-    name: "Wirecut / EDM Project",
-    description: "Create this part using Wirecut EDM on hardened steel. Keep in mind: define precise cutting paths, maintain tight tolerances, control spark gap, and use proper dielectric fluid. Ensure high precision for all edges and corners.",
-    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
-    category: "Machining",
-  },
-  {
-    id: 4,
-    name: "Laser Cutting Job",
-    description: "Create this component using a laser cutting machine on sheet metal or acrylic. Keep in mind: ensure precise cut paths, maintain clean edges, adjust power and speed settings correctly, and avoid burn marks. Verify part dimensions after cutting.",
-    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
-    category: "Machining",
-  },
-  {
-    id: 5,
-    name: "Grinding / Finishing Job",
-    description: "Create this part using precision grinding machines for metal finishing. Keep in mind: achieve required surface finish, maintain dimensional accuracy, use correct grinding wheels, and avoid overheating. Inspect thoroughly after grinding.",
-    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
-    category: "Machining",
-  },
-  {
-    id: 6,
-    name: "Hobbing / Gear Manufacturing",
-    description: "Create this gear using hobbing machines with steel or alloy material. Keep in mind: maintain correct module and number of teeth, check pressure angle, ensure surface finish, and avoid backlash. Inspect dimensions carefully before assembly.",
-    image: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
-    category: "Machining",
-  },
-];
+  const templates = [
+    {
+      id: 1,
+      name: "CNC Project",
+      description:
+        "Create this CNC milling part using high-grade aluminum or mild steel. Keep in mind: maintain tight dimensional tolerances, smooth surface finish, and proper fixturing. Ensure spindle speed and feed rate are optimized to avoid material deformation.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+    {
+      id: 2,
+      name: "VMC Machining Job",
+      description:
+        "Create this component using a VMC machine with steel or cast iron. Keep in mind: verify critical dimensions, ensure consistent tool paths, and minimize chatter. Use proper coolant and cutting tools for optimal surface finish.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+    {
+      id: 3,
+      name: "Wirecut / EDM Project",
+      description:
+        "Create this part using Wirecut EDM on hardened steel. Keep in mind: define precise cutting paths, maintain tight tolerances, control spark gap, and use proper dielectric fluid. Ensure high precision for all edges and corners.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+    {
+      id: 4,
+      name: "Laser Cutting Job",
+      description:
+        "Create this component using a laser cutting machine on sheet metal or acrylic. Keep in mind: ensure precise cut paths, maintain clean edges, adjust power and speed settings correctly, and avoid burn marks. Verify part dimensions after cutting.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+    {
+      id: 5,
+      name: "Grinding / Finishing Job",
+      description:
+        "Create this part using precision grinding machines for metal finishing. Keep in mind: achieve required surface finish, maintain dimensional accuracy, use correct grinding wheels, and avoid overheating. Inspect thoroughly after grinding.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+    {
+      id: 6,
+      name: "Hobbing / Gear Manufacturing",
+      description:
+        "Create this gear using hobbing machines with steel or alloy material. Keep in mind: maintain correct module and number of teeth, check pressure angle, ensure surface finish, and avoid backlash. Inspect dimensions carefully before assembly.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+    {
+      id: 7,
+      name: "Milling Project",
+      description:
+        "Machine this part using precision milling operations. Select suitable cutters, feeds, and speeds to maintain dimensional accuracy and surface finish. Ensure proper clamping, toolpath strategy, and tolerance checks for reliable assembly.",
+      image:
+        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      category: "Machining",
+    },
+  ];
   const fetchProjects = async () => {
     try {
       const response = await axios.get(API_HOST + "/buyer/projects/", {
@@ -638,7 +659,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
           </div>
 
           {/* ---------- Desktop/Grid View ---------- */}
-          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-4">
             {/* Blank Form */}
             <div
               className="template-card bg-white rounded-lg border border-gray-200 p-4 cursor-pointer transition-shadow hover:shadow-md"
@@ -659,7 +680,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
             </div>
 
             {/* Some Template Cards */}
-            {templates.slice(0, 5).map((template) => (
+            {templates.slice(0, 7).map((template) => (
               <div
                 key={template.id}
                 className="template-card bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer transition-shadow hover:shadow-md"

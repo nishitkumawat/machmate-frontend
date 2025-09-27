@@ -42,13 +42,12 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const specializationsList = [
     "CNC Machining",
-    "3D Printing",
-    "Metal Fabrication",
-    "Plastic Molding",
-    "Electronics",
-    "Assembly",
-    "Prototyping",
-    "Custom Machinery",
+    "VMC Machining Job",
+    "Wirecut / EDM Project",
+    "Laser Cutting Job",
+    "Grinding / Finishing Job",
+    "Hobbing / Gear Manufacturing",
+    "Milling Project",
   ];
 
   const csrftoken = Cookies.get("csrftoken");

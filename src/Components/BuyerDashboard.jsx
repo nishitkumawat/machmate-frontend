@@ -6,6 +6,14 @@ import statesAndCitiesJSON from "../assets/states_and_districts.json";
 import Footer from "./Footer.jsx";
 import { Settings } from "lucide-react"; // gear icon
 
+import cncImg from "../assets/cnc.jpg";
+import vmcImg from "../assets/vmc.png";
+import edmImg from "../assets/wirecut.png";
+import laserImg from "../assets/lasercut.jpg";
+import grindingImg from "../assets/surfacegridning.png";
+import hobbingImg from "../assets/hobbing.jpg";
+import millingImg from "../assets/slotting.jpg";
+
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
@@ -107,63 +115,51 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       id: 1,
       name: "CNC Project",
       description:
-        "Create this CNC milling part using high-grade aluminum or mild steel. Keep in mind: maintain tight dimensional tolerances, smooth surface finish, and proper fixturing. Ensure spindle speed and feed rate are optimized to avoid material deformation.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+        "Create this CNC milling part using high-grade aluminum or mild steel...",
+      image: cncImg,
       category: "Machining",
     },
     {
       id: 2,
       name: "VMC Machining Job",
       description:
-        "Create this component using a VMC machine with steel or cast iron. Keep in mind: verify critical dimensions, ensure consistent tool paths, and minimize chatter. Use proper coolant and cutting tools for optimal surface finish.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+        "Create this component using a VMC machine with steel or cast iron...",
+      image: vmcImg,
       category: "Machining",
     },
     {
       id: 3,
       name: "Wirecut / EDM Project",
-      description:
-        "Create this part using Wirecut EDM on hardened steel. Keep in mind: define precise cutting paths, maintain tight tolerances, control spark gap, and use proper dielectric fluid. Ensure high precision for all edges and corners.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      description: "Create this part using Wirecut EDM on hardened steel...",
+      image: edmImg,
       category: "Machining",
     },
     {
       id: 4,
       name: "Laser Cutting Job",
-      description:
-        "Create this component using a laser cutting machine on sheet metal or acrylic. Keep in mind: ensure precise cut paths, maintain clean edges, adjust power and speed settings correctly, and avoid burn marks. Verify part dimensions after cutting.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      description: "Create this component using a laser cutting machine...",
+      image: laserImg,
       category: "Machining",
     },
     {
       id: 5,
       name: "Grinding / Finishing Job",
-      description:
-        "Create this part using precision grinding machines for metal finishing. Keep in mind: achieve required surface finish, maintain dimensional accuracy, use correct grinding wheels, and avoid overheating. Inspect thoroughly after grinding.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      description: "Create this part using precision grinding machines...",
+      image: grindingImg,
       category: "Machining",
     },
     {
       id: 6,
       name: "Hobbing / Gear Manufacturing",
-      description:
-        "Create this gear using hobbing machines with steel or alloy material. Keep in mind: maintain correct module and number of teeth, check pressure angle, ensure surface finish, and avoid backlash. Inspect dimensions carefully before assembly.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      description: "Create this gear using hobbing machines...",
+      image: hobbingImg,
       category: "Machining",
     },
     {
       id: 7,
       name: "Milling Project",
-      description:
-        "Machine this part using precision milling operations. Select suitable cutters, feeds, and speeds to maintain dimensional accuracy and surface finish. Ensure proper clamping, toolpath strategy, and tolerance checks for reliable assembly.",
-      image:
-        "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80",
+      description: "Machine this part using precision milling operations...",
+      image: millingImg,
       category: "Machining",
     },
   ];

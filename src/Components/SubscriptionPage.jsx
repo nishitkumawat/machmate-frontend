@@ -304,7 +304,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
             <div className="hidden md:flex items-center space-x-2">
               <button
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/makerprofile")}
                 className="px-4 py-2 text-blue-600 font-medium hover:text-blue-800"
               >
                 Profile
@@ -349,7 +349,9 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                 </p>
                 <p className="text-gray-600">
                   Plan valid until{" "}
-                  {new Date(userSubscription.end_date).toLocaleDateString()}
+                  {new Date(userSubscription.end_date).toLocaleDateString(
+                    "en-GB"
+                  )}
                 </p>
               </div>
               <button

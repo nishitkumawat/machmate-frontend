@@ -17,6 +17,7 @@ import millingImg from "../assets/slotting.jpg";
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showTemplateGallery, setShowTemplateGallery] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -157,7 +158,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     },
     {
       id: 7,
-      name: "Milling Project",
+      name: "Slotting Project",
       description: "Machine this part using precision milling operations...",
       image: millingImg,
       category: "Machining",
@@ -388,6 +389,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const confirmDeleteProject = async () => {
     try {
+      setIsDeleting(true);
       await axios.delete(API_HOST + `/buyer/projects/${projectToDelete}/`, {
         withCredentials: true,
         headers: {
@@ -409,6 +411,8 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       } else if (error.response?.status === 404) {
       } else {
       }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1433,9 +1437,14 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
               </button>
               <button
                 onClick={confirmDeleteProject}
-                className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition duration-300"
+                disabled={isDeleting}
+                className={`px-4 py-2 font-medium rounded-md transition duration-300 ${
+                  isDeleting
+                    ? "bg-red-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 text-white"
+                }`}
               >
-                Delete
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

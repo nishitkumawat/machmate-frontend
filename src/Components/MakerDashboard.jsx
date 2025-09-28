@@ -18,6 +18,8 @@ import Footer from "./Footer.jsx";
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 function MakerDashboard({ setIsAuthenticated, setUserRole }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showCompanyForm, setShowCompanyForm] = useState(false);
   const [showQuotationDialog, setShowQuotationDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -223,6 +225,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const handleSubmitQuotation = async (e) => {
     e.preventDefault();
     try {
+      setIsSubmitting(true);
       const formData = new FormData();
       formData.append("amount", quotationData.amount);
       formData.append("description", quotationData.description);
@@ -263,6 +266,8 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     } catch (error) {
       console.error("Failed to submit quotation", error);
       alert("Failed to submit quotation. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -320,6 +325,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const handleCompanySubmit = async (e) => {
     e.preventDefault();
     try {
+      setIsSaving(true);
       await axios.post(
         API_HOST + "/maker/company-details/",
         {
@@ -344,6 +350,8 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     } catch (error) {
       console.error("Failed to save company profile", error);
       alert("Failed to save profile. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -498,9 +506,12 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
               >
                 {userSubscription && userSubscription.plan !== "none" ? (
                   <span className="flex items-center">
-                    <span className="mr-2">
-                      Credits: {userSubscription.remaining_credits}
-                    </span>
+                    {userSubscription.plan !== "premium" && (
+                      <span className="mr-2">
+                        Credits: {userSubscription.remaining_credits}
+                      </span>
+                    )}
+
                     <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                       {userSubscription.plan}
                     </span>
@@ -776,9 +787,15 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300"
+                    onClick={handleSaveProfile}
+                    disabled={isSaving}
+                    className={`px-4 py-2 font-medium rounded-md transition duration-300 ${
+                      isSaving
+                        ? "bg-blue-400 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
                   >
-                    Save Profile
+                    {isSaving ? "Saving..." : "Save Profile"}
                   </button>
                 </div>
               </form>
@@ -1450,9 +1467,15 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300"
+                    onClick={handleSubmitQuotation}
+                    disabled={isSubmitting}
+                    className={`px-4 py-2 font-medium rounded-md transition duration-300 ${
+                      isSubmitting
+                        ? "bg-blue-400 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
                   >
-                    Submit Quotation
+                    {isSubmitting ? "Submitting..." : "Submit Quotation"}
                   </button>
                 </div>
               </form>

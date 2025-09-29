@@ -13,6 +13,7 @@ import {
   Calendar,
   User,
   Crown,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
@@ -84,7 +85,6 @@ function ProductPage() {
         formData.append("pdf", quotationData.pdf);
       }
 
-      // Use existing create_quotation endpoint
       await axios.post(
         `${API_HOST}/maker/projects/${id}/quotation/`,
         formData,
@@ -104,7 +104,7 @@ function ProductPage() {
         completionDate: "",
         pdf: null,
       });
-      fetchProductDetails(); // Refresh product details to get updated quotations
+      fetchProductDetails();
       alert("Quotation submitted successfully!");
     } catch (error) {
       console.error("Failed to submit quotation", error);
@@ -125,7 +125,7 @@ function ProductPage() {
           }
         );
         setUserQuotation(null);
-        fetchProductDetails(); // Refresh product details
+        fetchProductDetails();
         alert("Quotation deleted successfully!");
       } catch (error) {
         console.error("Failed to delete quotation", error);
@@ -197,18 +197,20 @@ function ProductPage() {
           {/* Product Details */}
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Side - Image */}
+              {/* Left Side - Image Placeholder */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex justify-center"
               >
-                <img
-                  src={product.image || "/api/placeholder/500/400"}
-                  alt={product.name}
-                  className="w-full max-w-md h-80 object-cover rounded-lg shadow-md"
-                />
+                <div className="w-full max-w-md h-80 bg-gray-100 rounded-lg shadow-md flex flex-col items-center justify-center">
+                  <ImageIcon className="h-16 w-16 text-gray-400 mb-4" />
+                  <p className="text-gray-500 text-lg">Product Image</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    No image available
+                  </p>
+                </div>
               </motion.div>
 
               {/* Right Side - Details */}

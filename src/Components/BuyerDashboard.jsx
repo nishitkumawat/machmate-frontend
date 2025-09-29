@@ -48,7 +48,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
-  // Mock data for demonstration
+
   useEffect(() => {
     axios.get(API_HOST + "/csrf/", { withCredentials: true });
 
@@ -69,42 +69,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
       setActiveSection(currentSection);
     };
-
-    // Mock projects data
-    // setProjects([
-    //   {
-    //     id: 1,
-    //     name: "Custom CNC Parts",
-    //     description: "Need precision CNC machined parts for automotive project",
-    //     maxPrice: 15000,
-    //     estimatedDate: "2024-02-15",
-    //     pdfUrl: null,
-    //   },
-    //   {
-    //     id: 2,
-    //     name: "3D Printed Prototypes",
-    //     description: "Rapid prototyping for product development",
-    //     maxPrice: 8000,
-    //     estimatedDate: "2024-02-20",
-    //     pdfUrl: null,
-    //   },
-    // ]);
-
-    // // Mock completed orders
-    // setCompletedOrders([
-    //   {
-    //     completedId: 1,
-    //     projectName: "Metal Brackets",
-    //     projectDescription: "Custom metal brackets for industrial equipment",
-    //     makerName: "John Smith",
-    //     makerEmail: "john@example.com",
-    //     quotationAmount: 12000,
-    //     quotationMessage: "High quality steel brackets with powder coating",
-    //     amount: 12000,
-    //     completionDate: "2024-01-15",
-    //     report: "https://example.com/report1.pdf",
-    //   },
-    // ]);
 
     setIsLoading(false);
     window.addEventListener("scroll", handleScroll);
@@ -373,7 +337,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         }
       );
     } catch (error) {
-      console.error("Logout failed", err);
+      console.error("Logout failed", error);
     }
 
     localStorage.removeItem("user");
@@ -625,7 +589,19 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
           <div className="sm:hidden flex justify-between mb-4 space-x-2">
             {/* Left: Create New Project */}
             <button
-              onClick={() => setShowProjectForm(true)}
+              onClick={() => {
+                setProjectData({
+                  name: "",
+                  description: "",
+                  maxPrice: 10000,
+                  estimatedDate: "",
+                  address: "",
+                  state: "",
+                  city: "",
+                  pdf: null,
+                });
+                setShowProjectForm(true);
+              }}
               className="flex-1 bg-black text-white px-4 py-4 rounded-lg font-medium hover:bg-gray-800 transition text-center"
             >
               Create New Project
@@ -671,7 +647,19 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
             {/* Blank Form */}
             <div
               className="template-card bg-white rounded-lg border border-gray-200 p-4 cursor-pointer transition-shadow hover:shadow-md"
-              onClick={() => setShowProjectForm(true)}
+              onClick={() => {
+                setProjectData({
+                  name: "",
+                  description: "",
+                  maxPrice: 10000,
+                  estimatedDate: "",
+                  address: "",
+                  state: "",
+                  city: "",
+                  pdf: null,
+                });
+                setShowProjectForm(true);
+              }}
             >
               <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center mb-3">
                 <svg
@@ -692,7 +680,14 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
               <div
                 key={template.id}
                 className="template-card bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer transition-shadow hover:shadow-md"
-                onClick={() => setShowProjectForm(true)}
+                onClick={() => {
+                  setProjectData((prev) => ({
+                    ...prev,
+                    name: template.name,
+                    description: template.description,
+                  }));
+                  setShowProjectForm(true);
+                }}
               >
                 <div className="aspect-square">
                   <img
@@ -748,6 +743,11 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                         onClick={() => {
                           setShowTemplateGallery(false);
                           setShowProjectForm(true);
+                          setProjectData((prev) => ({
+                            ...prev,
+                            name: template.name,
+                            description: template.description,
+                          }));
                         }}
                       >
                         <div className="aspect-video">
@@ -788,6 +788,8 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                         setShowProjectForm(false);
                         setEditingProject(null);
                         setProjectData({
+                          name: "",
+                          description: "",
                           maxPrice: 10000,
                           estimatedDate: "",
                           address: "",
@@ -816,8 +818,97 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                   </div>
 
                   <form onSubmit={handleSubmitProject}>
-                    {/* Project fields (name, description, budget, date, address) */}
-                    {/* State & City */}
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-medium mb-2"
+                        htmlFor="name"
+                      >
+                        Project Name
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={projectData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-medium mb-2"
+                        htmlFor="description"
+                      >
+                        Description
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={projectData.description}
+                        onChange={handleInputChange}
+                        rows={4}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-medium mb-2"
+                        htmlFor="maxPrice"
+                      >
+                        Budget (₹)
+                      </label>
+                      <input
+                        type="number"
+                        id="maxPrice"
+                        name="maxPrice"
+                        value={projectData.maxPrice}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-medium mb-2"
+                        htmlFor="estimatedDate"
+                      >
+                        Expected Completion Date
+                      </label>
+                      <input
+                        type="date"
+                        id="estimatedDate"
+                        name="estimatedDate"
+                        value={projectData.estimatedDate}
+                        onChange={handleInputChange}
+                        min={today}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-medium mb-2"
+                        htmlFor="address"
+                      >
+                        Full Address
+                      </label>
+                      <input
+                        type="text"
+                        id="address"
+                        name="address"
+                        value={projectData.address}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label
@@ -872,8 +963,54 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       </div>
                     </div>
 
-                    {/* PDF Upload & Other fields */}
-                    {/* Submit + Cancel with loading */}
+                    <div className="mb-6">
+                      <label className="block text-gray-700 text-sm font-medium mb-2">
+                        Upload Project Specifications (PDF)
+                      </label>
+                      <div className="flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg
+                              className="w-8 h-8 mb-4 text-gray-500"
+                              aria-hidden="true"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 20 16"
+                            >
+                              <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                              />
+                            </svg>
+                            <p className="mb-2 text-sm text-gray-500">
+                              <span className="font-semibold">
+                                Click to upload
+                              </span>{" "}
+                              or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              PDF only (MAX. 10MB)
+                            </p>
+                          </div>
+                          <input
+                            id="pdf-upload"
+                            type="file"
+                            className="hidden"
+                            accept=".pdf"
+                            onChange={handleFileChange}
+                          />
+                        </label>
+                      </div>
+                      {pdfFileName && (
+                        <p className="mt-2 text-sm text-gray-600">
+                          Selected file: {pdfFileName}
+                        </p>
+                      )}
+                    </div>
+
                     <div className="flex justify-end space-x-3">
                       <button
                         type="button"
@@ -898,32 +1035,42 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center"
                         disabled={isSubmitting}
+                        className={`px-4 py-2 font-medium rounded-md transition duration-300 flex items-center justify-center ${
+                          isSubmitting
+                            ? "bg-blue-400 text-white cursor-not-allowed"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
+                        }`}
                       >
-                        {isSubmitting && (
-                          <svg
-                            className="animate-spin h-5 w-5 mr-2 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8v8H4z"
-                            ></path>
-                          </svg>
+                        {isSubmitting ? (
+                          <>
+                            <svg
+                              className="animate-spin h-5 w-5 mr-2 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                              ></path>
+                            </svg>
+                            Submitting...
+                          </>
+                        ) : editingProject ? (
+                          "Update Project"
+                        ) : (
+                          "Create Project"
                         )}
-                        {editingProject ? "Update Project" : "Create Project"}
                       </button>
                     </div>
                   </form>
@@ -1118,307 +1265,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
           </div>
         </section>
       </main>
-
-      {/* New Project Form Modal */}
-      {showProjectForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-screen overflow-y-auto relative">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {editingProject ? "Edit Project" : "Create New Project"}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowProjectForm(false);
-                    setEditingProject(null);
-                    setProjectData({
-                      name: "",
-                      description: "",
-                      maxPrice: 10000,
-                      estimatedDate: "",
-                      address: "",
-                      state: "",
-                      city: "",
-                      pdf: null,
-                    });
-                    setPdfFileName("");
-                  }}
-                  className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full p-2 transition"
-                >
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmitProject}>
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                    htmlFor="name"
-                  >
-                    Project Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={projectData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                    htmlFor="description"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={projectData.description}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                    htmlFor="maxPrice"
-                  >
-                    Budget (₹)
-                  </label>
-                  <input
-                    type="number"
-                    id="maxPrice"
-                    name="maxPrice"
-                    value={projectData.maxPrice}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                    htmlFor="estimatedDate"
-                  >
-                    Expected Completion Date
-                  </label>
-                  <input
-                    type="date"
-                    id="estimatedDate"
-                    name="estimatedDate"
-                    value={projectData.estimatedDate}
-                    onChange={handleInputChange}
-                    min={today}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-medium mb-2"
-                    htmlFor="address"
-                  >
-                    Full Address
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={projectData.address}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label
-                      className="block text-gray-700 text-sm font-medium mb-2"
-                      htmlFor="state"
-                    >
-                      State
-                    </label>
-                    <select
-                      id="state"
-                      name="state"
-                      value={projectData.state}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select State</option>
-                      {Object.keys(statesAndCitiesJSON).map((state) => (
-                        <option key={state} value={state}>
-                          {state}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-gray-700 text-sm font-medium mb-2"
-                      htmlFor="city"
-                    >
-                      City
-                    </label>
-                    <select
-                      id="city"
-                      name="city"
-                      value={projectData.city}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                      disabled={!projectData.state}
-                    >
-                      <option value="">Select City</option>
-                      {projectData.state &&
-                        statesAndCitiesJSON[projectData.state].map((city) => (
-                          <option key={city} value={city}>
-                            {city}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Upload Project Specifications (PDF)
-                  </label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg
-                          className="w-8 h-8 mb-4 text-gray-500"
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 20 16"
-                        >
-                          <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                          />
-                        </svg>
-                        <p className="mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          PDF only (MAX. 10MB)
-                        </p>
-                      </div>
-                      <input
-                        id="pdf-upload"
-                        type="file"
-                        className="hidden"
-                        accept=".pdf"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  </div>
-                  {pdfFileName && (
-                    <p className="mt-2 text-sm text-gray-600">
-                      Selected file: {pdfFileName}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowProjectForm(false);
-                      setEditingProject(null);
-                      setProjectData({
-                        name: "",
-                        description: "",
-                        maxPrice: 10000,
-                        estimatedDate: "",
-                        address: "",
-                        state: "",
-                        city: "",
-                        pdf: null,
-                      });
-                      setPdfFileName("");
-                    }}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition duration-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 font-medium rounded-md transition duration-300 flex items-center justify-center ${
-                      isSubmitting
-                        ? "bg-blue-400 text-white cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <svg
-                          className="animate-spin h-5 w-5 mr-2 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
-                          ></path>
-                        </svg>
-                        Submitting...
-                      </>
-                    ) : editingProject ? (
-                      "Update Project"
-                    ) : (
-                      "Create Project"
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (

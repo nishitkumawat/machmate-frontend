@@ -17,6 +17,7 @@ import PrivacyPolicy from "./Pages/PrivacyPolicy";
 import ShippingPolicy from "./Pages/ShippingPolicy";
 import TermsAndConditions from "./Pages/TermsAndConditions";
 
+import ProjectDetail from "./Components/ProjectDetail";
 import BuyerProfile from "./Components/BuyerProfile";
 import MakerProfile from "./Components/MakerProfile";
 
@@ -182,6 +183,20 @@ function App() {
         element={
           isAuthenticated ? (
             <SubscriptionPage
+              setIsAuthenticated={setIsAuthenticated}
+              setUserRole={setUserRole}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/project/:projectId"
+        element={
+          isAuthenticated && userRole === "maker" ? (
+            <ProjectDetail
               setIsAuthenticated={setIsAuthenticated}
               setUserRole={setUserRole}
             />

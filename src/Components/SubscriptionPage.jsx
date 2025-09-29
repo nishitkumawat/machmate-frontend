@@ -134,7 +134,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
       // 3️⃣ Initialize Razorpay checkout
       const options = {
-        key: "rzp_test_RH3ixs0hei2zdF", // Your Razorpay key
+        key: "rzp_live_RNKzs8FQpd6VDd", // Your Razorpay key
         amount: amount, // amount in paise
         currency: currency,
         name: "MachMate",

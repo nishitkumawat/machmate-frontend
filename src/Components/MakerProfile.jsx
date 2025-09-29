@@ -7,6 +7,10 @@ import statesAndCitiesJSON from "../assets/states_and_districts.json";
 const API_HOST = import.meta.env.VITE_API_HOST;
 
 function MakerProfile({ setIsAuthenticated, setUserRole }) {
+  const [referralData, setReferralData] = useState({
+    code: "",
+    benefits: "",
+  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
   const [userData, setUserData] = useState({
@@ -56,7 +60,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(API_HOST+"/auth/profile/", {
+      const response = await axios.get(API_HOST + "/auth/profile/", {
         withCredentials: true,
         headers: { "X-CSRFToken": csrftoken },
       });
@@ -67,6 +71,14 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
         email: response.data.email || "",
         phone: response.data.phone || "",
       }));
+
+      if (response.data.referral_code) {
+        setReferralData({
+          code: response.data.referral_code,
+          benefits:
+            "Share this code to get extra credits! Each referral gives you and your friend 10 Quotation credits and plan will get extended by 10 days.",
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch user data", error);
       if (error.response?.status === 401) {
@@ -82,13 +94,10 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
 
   const fetchCompanyData = async () => {
     try {
-      const response = await axios.get(
-        API_HOST+"/maker/company-details/",
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
-      );
+      const response = await axios.get(API_HOST + "/maker/company-details/", {
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
       console.log("API Response:", response.data);
 
       if (response.data && !response.data.error) {
@@ -177,7 +186,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
       }
 
       const response = await axios.put(
-        API_HOST+"/auth/profile/update/",
+        API_HOST + "/auth/profile/update/",
         payload,
         {
           withCredentials: true,
@@ -217,8 +226,8 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
       setIsLoading(true);
 
       const endpoint = hasCompanyProfile
-        ? API_HOST+"/maker/company-details/update/"
-        : API_HOST+"/maker/company-details/create/";
+        ? API_HOST + "/maker/company-details/update/"
+        : API_HOST + "/maker/company-details/create/";
 
       const method = hasCompanyProfile ? "put" : "post";
 
@@ -278,7 +287,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
       };
 
       const response = await axios.post(
-        API_HOST+"/auth/profile/change-password/",
+        API_HOST + "/auth/profile/change-password/",
         payload,
         {
           withCredentials: true,
@@ -330,7 +339,7 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
   const handleLogout = async () => {
     try {
       await axios.post(
-        API_HOST+"/auth/logout/",
+        API_HOST + "/auth/logout/",
         {},
         {
           withCredentials: true,
@@ -563,6 +572,29 @@ function MakerProfile({ setIsAuthenticated, setUserRole }) {
                     )}
                   </div>
                 </form>
+
+                {/* Referral Code Section */}
+                {referralData.code && (
+                  <div className="mt-8 p-6 bg-blue-50 border-l-4 border-blue-400 rounded-md">
+                    <h3 className="text-lg font-medium text-blue-800 mb-2">
+                      Your Referral Code
+                    </h3>
+                    <p className="text-blue-700 mb-2 text-sm">
+                      <span className="font-semibold">{referralData.code}</span>
+                    </p>
+                    <p className="text-blue-700 text-sm">
+                      {referralData.benefits}
+                    </p>
+                    <button
+                      onClick={() =>
+                        navigator.clipboard.writeText(referralData.code)
+                      }
+                      className="mt-3 inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Copy Code
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

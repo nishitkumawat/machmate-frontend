@@ -16,6 +16,7 @@ const Signup = () => {
     phone: "",
     accountType: "buyer",
     acceptTerms: false,
+    referralCode: "",
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -184,7 +185,9 @@ const Signup = () => {
         password: formData.password,
         phone: formData.phone,
         accountType: formData.accountType,
+        referralCode: formData.referralCode || null,
       });
+
 
       setSuccessMessage("Account created successfully! You can now login.");
       setFormData({
@@ -195,6 +198,7 @@ const Signup = () => {
         phone: "",
         accountType: "buyer",
         acceptTerms: false,
+        referralCode: "",
       });
       setIsVerified({ email: false });
       setOtpSent({ email: false });
@@ -493,6 +497,23 @@ const Signup = () => {
                     <span>{errors.confirmPassword}</span>
                   </p>
                 )}
+              </div>
+              {/* Referral Code (Optional) */}
+              <div className="mb-6 group">
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  Referral Code (Optional)
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="referralCode"
+                    value={formData.referralCode}
+                    onChange={handleChange}
+                    placeholder="Enter referral code"
+                    className="w-full bg-transparent border-0 border-b-2 border-blue-400/50 text-blue-800 placeholder-blue-500/70 focus:border-blue-600 focus:ring-0 px-0 py-3 transition-all duration-300 focus:placeholder-transparent"
+                  />
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 transition-all duration-300 group-hover:w-full"></div>
+                </div>
               </div>
 
               {/* Terms and Conditions */}

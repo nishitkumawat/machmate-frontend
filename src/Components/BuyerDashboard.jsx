@@ -116,7 +116,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       id: 1,
       name: "CNC Project",
       description:
-        "Create this CNC milling part using high-grade aluminum or mild steel...",
+        "This CNC machining project involves manufacturing a precision component using high-grade aluminum or mild steel. The job requires accurate toolpath programming, maintaining tight dimensional tolerances (±0.01 mm), and ensuring a smooth surface finish through optimized cutting speeds and feed rates. Proper work holding, tool selection, and coolant flow are critical to avoid tool wear and part deformation. Applications may include aerospace, automotive, or industrial machine components.",
       image: cncImg,
       category: "Machining",
     },
@@ -124,46 +124,52 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       id: 2,
       name: "VMC Machining Job",
       description:
-        "Create this component using a VMC machine with steel or cast iron...",
+        "This Vertical Machining Center (VMC) job requires creating a complex steel or cast iron component with precision cavities, slots, and profiles. The process involves multi-axis machining with carbide tooling, rigid workholding, and consistent coolant supply for thermal stability. The project emphasizes accuracy, repeatability, and productivity, making it ideal for die & mold manufacturing, automotive parts, and high-volume production environments.",
       image: vmcImg,
       category: "Machining",
     },
     {
       id: 3,
       name: "Wirecut / EDM Project",
-      description: "Create this part using Wirecut EDM on hardened steel...",
+      description:
+        "This project requires fabricating a part using Wire EDM (Electrical Discharge Machining) on hardened steel or carbide materials. The process ensures micron-level precision, sharp internal corners, and burr-free finishes, even on heat-treated or difficult-to-machine alloys. Wirecut EDM is particularly suited for tooling, punches, dies, and intricate profiles where conventional machining cannot achieve the required accuracy.",
       image: edmImg,
       category: "Machining",
     },
     {
       id: 4,
       name: "Laser Cutting Job",
-      description: "Create this component using a laser cutting machine...",
+      description:
+        "This laser cutting project involves producing flat sheet metal parts with complex geometries and fine details. The job uses CNC laser cutting machines to achieve precise contours, smooth edges, and minimal material waste. Compatible materials include mild steel, stainless steel, and aluminum. Laser cutting is best suited for enclosures, panels, signage, and customized sheet-metal components that require clean cuts without post-processing.",
       image: laserImg,
       category: "Machining",
     },
     {
       id: 5,
       name: "Grinding / Finishing Job",
-      description: "Create this part using precision grinding machines...",
+      description:
+        "This precision grinding project requires achieving superior surface finishes and tight dimensional accuracy on hardened steel or alloy components. Processes include cylindrical grinding, surface grinding, and centerless grinding, depending on the part geometry. Attention is given to achieving fine tolerances, roundness, and parallelism. This operation is crucial for shafts, bearing fits, and critical machine parts requiring wear resistance and smooth operation.",
       image: grindingImg,
       category: "Machining",
     },
     {
       id: 6,
       name: "Hobbing / Gear Manufacturing",
-      description: "Create this gear using hobbing machines...",
+      description:
+        "This project involves manufacturing precision gears using gear hobbing processes. Material selection typically includes alloy steels with heat treatment for strength and wear resistance. The operation requires accurate indexing, hob cutter selection, and cutting parameters to achieve correct gear tooth profile, pitch, and alignment. Applications include automotive transmissions, industrial gearboxes, and mechanical drive systems requiring high load capacity and durability.",
       image: hobbingImg,
       category: "Machining",
     },
     {
       id: 7,
       name: "Slotting Project",
-      description: "Machine this part using precision milling operations...",
+      description:
+        "This machining project focuses on creating precision slots, keyways, and grooves using vertical slotting or milling machines. The process requires rigid setups, precise feed control, and appropriate tool geometry to ensure accuracy and surface finish. Slotting operations are widely used in gear manufacturing, keyway cutting, and internal features where conventional milling or drilling cannot achieve the desired profile.",
       image: millingImg,
       category: "Machining",
     },
   ];
+
   const fetchProjects = async () => {
     try {
       const response = await axios.get(API_HOST + "/buyer/projects/", {
@@ -316,6 +322,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     } catch (error) {
       console.error("Failed to save project", error);
       alert("Failed to save project. Please try again.");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -644,6 +651,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                         setShowProjectForm(true);
                         setProjectData((prev) => ({
                           ...prev,
+                          name: template.name,
                           description: template.description,
                         }));
                       }}
@@ -780,8 +788,6 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                         setShowProjectForm(false);
                         setEditingProject(null);
                         setProjectData({
-                          name: "",
-                          description: "",
                           maxPrice: 10000,
                           estimatedDate: "",
                           address: "",

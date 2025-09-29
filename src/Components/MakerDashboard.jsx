@@ -787,7 +787,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    onClick={handleSaveProfile}
+                    onClick={handleCompanySubmit}
                     disabled={isSaving}
                     className={`px-4 py-2 font-medium rounded-md transition duration-300 ${
                       isSaving

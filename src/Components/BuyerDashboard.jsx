@@ -39,15 +39,29 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
     state: "",
     city: "",
     pdf: null,
+    template: "", // New field for template selection
   });
   const [pdfFileName, setPdfFileName] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [quotations, setQuotations] = useState([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
+  const [error, setError] = useState("");
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
+
+  // Enhanced error handler for authentication issues
+  const handleAuthError = (error) => {
+    if (error.response?.status === 401) {
+      setError("Your session has expired. Please log in again.");
+      setTimeout(() => {
+        handleLogout();
+      }, 2000);
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     axios.get(API_HOST + "/csrf/", { withCredentials: true });
@@ -141,8 +155,12 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         headers: { "X-CSRFToken": csrftoken },
       });
       setProjects(response.data);
+      setError("");
     } catch (error) {
       console.error("Failed to fetch projects", error);
+      if (!handleAuthError(error)) {
+        setError("Failed to load projects. Please try again.");
+      }
     }
   };
 
@@ -153,13 +171,18 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         headers: { "X-CSRFToken": csrftoken },
       });
       setCompletedOrders(response.data);
+      setError("");
     } catch (error) {
       console.error("Failed to fetch completed orders", error);
+      if (!handleAuthError(error)) {
+        setError("Failed to load completed orders. Please try again.");
+      }
     }
   };
 
   const fetchQuotations = async (projectId) => {
     try {
+      setError("");
       const response = await axios.get(
         API_HOST + `/buyer/projects/${projectId}/quotations/`,
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
@@ -169,11 +192,25 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       setShowQuotationsDialog(true);
     } catch (error) {
       console.error("Failed to fetch quotations", error);
+      if (handleAuthError(error)) {
+        return;
+      }
+
+      if (error.response?.status === 404) {
+        setError("No quotations found for this project yet.");
+        setShowQuotationsDialog(true);
+        setQuotations([]);
+      } else {
+        setError("Failed to load quotations. Please try again.");
+        setShowQuotationsDialog(true);
+        setQuotations([]);
+      }
     }
   };
 
   const acceptQuotation = async (quotationId) => {
     try {
+      setError("");
       await axios.post(
         API_HOST + `/buyer/quotations/${quotationId}/accept/`,
         {},
@@ -189,6 +226,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       );
     } catch (error) {
       console.error("Failed to accept quotation", error);
+      if (handleAuthError(error)) {
+        return;
+      }
       alert("Failed to accept quotation. Please try again.");
     }
   };
@@ -199,6 +239,15 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       ...prev,
       [name]: value,
       ...(name === "state" ? { city: "" } : {}),
+      // If template is selected, auto-fill name and description
+      ...(name === "template" && value
+        ? {
+            name: templates.find((t) => t.id === parseInt(value))?.name || "",
+            description:
+              templates.find((t) => t.id === parseInt(value))?.description ||
+              "",
+          }
+        : {}),
     }));
   };
 
@@ -219,6 +268,8 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const handleSubmitProject = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
+
     // Validate that date is not in the past
     const selectedDate = new Date(projectData.estimatedDate);
     const today = new Date();
@@ -226,6 +277,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
     if (selectedDate < today) {
       alert("Estimated completion date cannot be in the past");
+      setIsSubmitting(false);
       return;
     }
 
@@ -238,6 +290,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       formData.append("address", projectData.address);
       formData.append("state", projectData.state);
       formData.append("city", projectData.city);
+      formData.append("template", projectData.template); // Add template to form data
 
       if (projectData.pdf) {
         formData.append("pdf", projectData.pdf);
@@ -278,6 +331,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         state: "",
         city: "",
         pdf: null,
+        template: "",
       });
       setPdfFileName("");
 
@@ -285,6 +339,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       fetchProjects();
     } catch (error) {
       console.error("Failed to save project", error);
+      if (handleAuthError(error)) {
+        return;
+      }
       alert("Failed to save project. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -302,6 +359,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       state: project.state,
       city: project.city,
       pdf: null, // Reset file when editing
+      template: project.template || "",
     });
     setPdfFileName(project.pdf ? "Existing file uploaded" : "");
     setShowProjectForm(true);
@@ -309,8 +367,22 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const handleDownloadPdf = (project) => {
     if (!project.pdfUrl) return;
+
+    // Fix for malformed PDF URLs - extract the actual URL if it's nested
+    let pdfUrl = project.pdfUrl;
+
+    // If the URL contains another URL, extract the inner one
+    if (pdfUrl.includes("media/https://")) {
+      pdfUrl = pdfUrl.replace("media/https://", "https://");
+    }
+
+    // If it still contains media/ at the beginning, remove it
+    if (pdfUrl.startsWith("media/")) {
+      pdfUrl = pdfUrl.replace("media/", "");
+    }
+
     const link = document.createElement("a");
-    link.href = project.pdfUrl;
+    link.href = pdfUrl;
     link.download = project.name + ".pdf";
     link.target = "_blank";
     link.click();
@@ -318,8 +390,20 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const handleDownloadQuotationPdf = (quotation) => {
     if (!quotation.pdf_quotation) return;
+
+    let pdfUrl = quotation.pdf_quotation;
+
+    // Apply the same fix for quotation PDFs
+    if (pdfUrl.includes("media/https://")) {
+      pdfUrl = pdfUrl.replace("media/https://", "https://");
+    }
+
+    if (pdfUrl.startsWith("media/")) {
+      pdfUrl = pdfUrl.replace("media/", "");
+    }
+
     const link = document.createElement("a");
-    link.href = quotation.pdf_quotation;
+    link.href = pdfUrl;
     link.download = `quotation_${quotation.quotation_id}.pdf`;
     link.target = "_blank";
     link.click();
@@ -361,6 +445,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const confirmDeleteProject = async () => {
     try {
       setIsDeleting(true);
+      setError("");
       await axios.delete(API_HOST + `/buyer/projects/${projectToDelete}/`, {
         withCredentials: true,
         headers: {
@@ -375,13 +460,10 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
       alert("Project deleted successfully!");
     } catch (error) {
       console.error("Failed to delete project", error);
-      if (error.response?.status === 401) {
-        alert("Your session has expired. Please log in again.");
-        handleLogout();
-      } else if (error.response?.status === 403) {
-      } else if (error.response?.status === 404) {
-      } else {
+      if (handleAuthError(error)) {
+        return;
       }
+      alert("Failed to delete project. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -420,8 +502,35 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Error Banner */}
+      {error && (
+        <div className="fixed top-16 left-0 right-0 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 z-50">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={() => setError("")}
+              className="text-red-700 hover:text-red-900"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <nav className="bg-white shadow-md fixed w-full z-50">
+      <nav className="bg-white shadow-md fixed w-full z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo */}
@@ -571,8 +680,9 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
           </div>
         )}
       </nav>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Start a new form section */}
         <section className="mb-12">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
@@ -599,6 +709,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                   state: "",
                   city: "",
                   pdf: null,
+                  template: "",
                 });
                 setShowProjectForm(true);
               }}
@@ -629,6 +740,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                           ...prev,
                           name: template.name,
                           description: template.description,
+                          template: template.id.toString(),
                         }));
                       }}
                     >
@@ -657,6 +769,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                   state: "",
                   city: "",
                   pdf: null,
+                  template: "",
                 });
                 setShowProjectForm(true);
               }}
@@ -685,6 +798,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                     ...prev,
                     name: template.name,
                     description: template.description,
+                    template: template.id.toString(),
                   }));
                   setShowProjectForm(true);
                 }}
@@ -747,6 +861,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                             ...prev,
                             name: template.name,
                             description: template.description,
+                            template: template.id.toString(),
                           }));
                         }}
                       >
@@ -796,6 +911,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                           state: "",
                           city: "",
                           pdf: null,
+                          template: "",
                         });
                         setPdfFileName("");
                       }}
@@ -818,6 +934,34 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                   </div>
 
                   <form onSubmit={handleSubmitProject}>
+                    {/* Template Dropdown */}
+                    <div className="mb-4">
+                      <label
+                        className="block text-gray-700 text-sm font-medium mb-2"
+                        htmlFor="template"
+                      >
+                        Select Work Type (Template)
+                      </label>
+                      <select
+                        id="template"
+                        name="template"
+                        value={projectData.template}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select a template...</option>
+                        {templates.map((template) => (
+                          <option key={template.id} value={template.id}>
+                            {template.name}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Selecting a template will auto-fill the project name and
+                        description
+                      </p>
+                    </div>
+
                     <div className="mb-4">
                       <label
                         className="block text-gray-700 text-sm font-medium mb-2"
@@ -1026,6 +1170,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                             state: "",
                             city: "",
                             pdf: null,
+                            template: "",
                           });
                           setPdfFileName("");
                         }}
@@ -1268,7 +1413,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Confirm Deletion
@@ -1303,10 +1448,10 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         </div>
       )}
 
-      {/* Quotations Dialog */}
+      {/* Quotations Dialog - Improved UI */}
       {showQuotationsDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -1314,7 +1459,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                 </h2>
                 <button
                   onClick={() => setShowQuotationsDialog(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full p-2 transition"
                 >
                   <svg
                     className="h-6 w-6"
@@ -1332,94 +1477,142 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                 </button>
               </div>
 
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-700">{error}</p>
+                </div>
+              )}
+
               {quotations.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-6">
                   {quotations.map((quotation) => (
                     <div
                       key={quotation.quotation_id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-300"
+                      className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 bg-white"
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="font-medium text-gray-900">
-                            Quotation #{quotation.quotation_id}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            Maker: {quotation.maker_name}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Email: {quotation.maker_email}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Phone: {quotation.maker_phone}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Address: {quotation.maker_address}
-                          </p>
+                      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <div className="space-y-1 text-sm text-gray-600">
+                                <p>
+                                  <span className="font-medium">Maker:</span>{" "}
+                                  {quotation.maker_name}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Email:</span>{" "}
+                                  {quotation.maker_email}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Phone:</span>{" "}
+                                  {quotation.maker_phone}
+                                </p>
+                                <p>
+                                  <span className="font-medium">Address:</span>{" "}
+                                  {quotation.maker_address}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-blue-600 mb-2">
+                                ₹{quotation.price}
+                              </div>
+                            </div>
+                          </div>
+
+                          {quotation.description && (
+                            <div className="mb-4">
+                              <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                                {quotation.description}
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="flex flex-col sm:flex-row sm:justify-between text-sm text-gray-500 gap-2">
+                            <span>
+                              <span className="font-medium">
+                                Estimated completion:
+                              </span>{" "}
+                              {new Date(
+                                quotation.estimated_date
+                              ).toLocaleDateString()}
+                            </span>
+                            <span>
+                              <span className="font-medium">Submitted:</span>{" "}
+                              {new Date(
+                                quotation.created_at
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-lg font-bold text-blue-600">
-                          ₹{quotation.price}
-                        </span>
                       </div>
 
-                      <p className="text-sm text-gray-600 mb-3">
-                        {quotation.description}
-                      </p>
-
-                      <div className="flex justify-between text-sm text-gray-500">
-                        <span>
-                          Estimated completion:{" "}
-                          {new Date(
-                            quotation.estimated_date
-                          ).toLocaleDateString()}
-                        </span>
-                        <span>
-                          Submitted:{" "}
-                          {new Date(quotation.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <div className="mt-3 flex justify-between items-center">
-                        {quotation.pdf_quotation && (
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200">
+                        <div className="flex-1">
+                          {quotation.pdf_quotation && (
+                            <button
+                              onClick={() =>
+                                handleDownloadQuotationPdf(quotation)
+                              }
+                              className="text-blue-600 hover:text-blue-800 text-sm flex items-center font-medium"
+                            >
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                              </svg>
+                              Download Quotation PDF
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex justify-end">
                           <button
                             onClick={() =>
-                              handleDownloadQuotationPdf(quotation)
+                              acceptQuotation(quotation.quotation_id)
                             }
-                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                            className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300 shadow-sm hover:shadow-md"
                           >
-                            <svg
-                              className="w-4 h-4 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                              />
-                            </svg>
-                            Download Quotation PDF
+                            Accept Quotation
                           </button>
-                        )}
-                        <button
-                          onClick={() =>
-                            acceptQuotation(quotation.quotation_id)
-                          }
-                          className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition duration-300"
-                        >
-                          Accept Quotation
-                        </button>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-8">
-                  No quotations found for this project yet.
-                </p>
+                <div className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <svg
+                      className="w-16 h-16 mx-auto"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1}
+                        d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Quotations Yet
+                  </h3>
+                  <p className="text-gray-500">
+                    No suppliers have submitted quotations for this project yet.
+                    Check back later.
+                  </p>
+                </div>
               )}
             </div>
           </div>

@@ -51,12 +51,7 @@ function LandingPage() {
               >
                 Features
               </a>
-              <a
-                href="#pricing"
-                className="text-gray-600 hover:text-blue-600 px-3 py-2 font-medium"
-              >
-                Pricing
-              </a>
+
               <a
                 href="/contact"
                 className="text-gray-600 hover:text-blue-600 px-3 py-2 font-medium"
@@ -556,67 +551,6 @@ function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-16 bg-white px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Subscription <span className="text-blue-600">Plans</span>
-          </h2>
-          <p className="text-lg text-gray-600 mb-12">
-            Choose a plan that suits your business needs. Simple and transparent
-            pricing.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {/* Basic Plan */}
-            <div className="bg-blue-50 rounded-xl p-6 shadow-md hover:shadow-lg transition duration-300">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Basic
-              </h3>
-              <p className="text-4xl font-bold text-blue-600 mb-6">
-                ₹499
-                <span className="text-lg font-medium text-gray-500">/mo</span>
-              </p>
-              <ul className="text-gray-600 space-y-3">
-                <li>10 quotations upload per month</li>
-                <li>Standard listing in search results</li>
-                <li>Basic customer support</li>
-              </ul>
-            </div>
-
-            {/* Pro Plan */}
-            <div className="bg-blue-600 text-white rounded-xl p-6 shadow-lg transform scale-105">
-              <h3 className="text-xl font-semibold mb-4">Pro</h3>
-              <p className="text-4xl font-bold mb-6">
-                ₹1499<span className="text-lg font-medium opacity-80">/mo</span>
-              </p>
-              <ul className="opacity-90 space-y-3">
-                <li>100 quotations upload per month</li>
-                <li>Priority visibility in search</li>
-                <li>Faster response times</li>
-                <li>Dedicated customer support</li>
-              </ul>
-            </div>
-
-            {/* Premium Plan */}
-            <div className="bg-blue-50 rounded-xl p-6 shadow-md hover:shadow-lg transition duration-300">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Premium
-              </h3>
-              <p className="text-4xl font-bold text-blue-600 mb-6">
-                ₹3499
-                <span className="text-lg font-medium text-gray-500">/mo</span>
-              </p>
-              <ul className="text-gray-600 space-y-3">
-                <li>Unlimited quotations upload</li>
-                <li>Highlighted quotations</li>
-                <li>Top priority in search results</li>
-                <li>24/7 premium support</li>
-                <li>Early access to new features</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-16 bg-blue-600 text-white px-4">

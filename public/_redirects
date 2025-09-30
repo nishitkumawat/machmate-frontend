@@ -1,2 +1,17 @@
-/*    /index.html   200
-/project/*    /index.html    200
+# SPA routing: all /project/* paths go to index.html
+/project/*    /project/index.html    200
+
+# Optional: redirect root to your main dashboard or landing page
+/    /index.html    200
+
+# Assets handling (ensure your static files load correctly)
+# Netlify serves /project/assets/* automatically if they exist in /dist/project/assets/
+# But this rule ensures that any missing asset doesn't break the SPA
+/project/assets/*    /project/assets/:splat    200
+
+# Favicon and manifest
+/favicon.png    /favicon.png    200
+/manifest.json    /manifest.json    200
+
+# Optional: catch-all fallback for other pages (if needed)
+/*    /index.html    200

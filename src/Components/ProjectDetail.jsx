@@ -49,7 +49,7 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
   const fetchProjectDetails = async () => {
     try {
       setError("");
-      
+
       // Use the product_details endpoint that matches your Django backend
       const response = await axios.get(
         API_HOST + `/maker/products/${projectId}/`,
@@ -59,7 +59,6 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
         }
       );
 
-     
       if (response.data) {
         setProject(response.data);
       } else {
@@ -68,7 +67,6 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
     } catch (error) {
       console.error("Failed to fetch project details", error);
       // If product-details endpoint fails, try the open projects endpoint
-      
     } finally {
       setIsLoading(false);
     }
@@ -198,7 +196,7 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
       }
 
       const response = await axios.post(
-        API_HOST + `/maker/projects/${projectId}/quotation/`,
+        `${API_HOST}/maker/projects/${projectId}/quotation/`,
         formData,
         {
           withCredentials: true,
@@ -221,7 +219,6 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
         });
         setPdfFileName("");
 
-        // Refresh data
         await Promise.all([checkUserQuotation(), fetchUserSubscription()]);
 
         alert("Quotation submitted successfully!");
@@ -229,6 +226,7 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
     } catch (error) {
       console.error("Failed to submit quotation", error);
       const errorMessage =
+        error.response?.data?.error ||
         error.response?.data?.message ||
         "Failed to submit quotation. Please try again.";
       setError(errorMessage);

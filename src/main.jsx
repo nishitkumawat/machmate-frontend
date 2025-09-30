@@ -12,7 +12,7 @@ function Root() {
 
   return (
     <StrictMode>
-      <BrowserRouter>
+      <BrowserRouter basename="/">
         <App />
       </BrowserRouter>
     </StrictMode>

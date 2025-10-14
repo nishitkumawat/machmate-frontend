@@ -15,6 +15,7 @@ import {
   MapPin,
   IndianRupee,
   Clock,
+  Menu,
 } from "lucide-react";
 import Footer from "./Footer.jsx";
 
@@ -35,6 +36,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [userSubscription, setUserSubscription] = useState(null);
   const [userState, setUserState] = useState("");
   const [userQuotations, setUserQuotations] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const csrftoken = getCookie("machmate_csrftoken");
   const navigate = useNavigate();
@@ -45,7 +47,6 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     if (parts.length === 2) return parts.pop().split(";").shift();
     return null;
   }
-
 
   useEffect(() => {
     axios.get(API_HOST + "/csrf/", { withCredentials: true });
@@ -160,6 +161,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     setIsAuthenticated(false);
     setUserRole(null);
     navigate("/");
+    setMobileMenuOpen(false);
   };
 
   // Filter and sort projects
@@ -208,6 +210,16 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const handleQuotationClick = (quotation) => {
     navigate(`/project/${quotation.work_id}`);
   };
+
+  const handleMobileNavClick = (action) => {
+    setMobileMenuOpen(false);
+    if (action === "profile") {
+      navigate("/makerprofile");
+    } else if (action === "subscription") {
+      navigate("/subscription");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white">
@@ -363,8 +375,98 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
                 Logout
               </button>
             </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t border-gray-200"
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <a
+                href="#dashboard"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  activeSection === "dashboard"
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </a>
+              <a
+                href="#quotations"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  activeSection === "quotations"
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                My Quotations
+              </a>
+
+              {/* Subscription Info */}
+              <div className="px-3 py-2">
+                <button
+                  onClick={() => handleMobileNavClick("subscription")}
+                  className="w-full text-left text-blue-600 font-medium hover:text-blue-800"
+                >
+                  {userSubscription && userSubscription.plan !== "none" ? (
+                    <span className="flex items-center justify-between">
+                      <span className="flex items-center">
+                        {userSubscription.plan !== "premium" && (
+                          <span className="mr-2">
+                            Credits: {userSubscription.remaining_credits}
+                          </span>
+                        )}
+                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                          {userSubscription.plan}
+                        </span>
+                      </span>
+                      <span className="text-sm">Manage →</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-between">
+                      Subscribe
+                      <span className="text-sm">Get Started →</span>
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              {/* Profile */}
+              <button
+                onClick={() => handleMobileNavClick("profile")}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+              >
+                Profile
+              </button>
+
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-800 hover:bg-red-50"
+              >
+                Logout
+              </button>
+            </div>
+          </motion.div>
+        )}
       </nav>
 
       {/* Dashboard Content */}

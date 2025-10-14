@@ -36,8 +36,16 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
   const [userState, setUserState] = useState("");
   const [userQuotations, setUserQuotations] = useState([]);
 
-  const csrftoken = Cookies.get("csrftoken");
+  const csrftoken = getCookie("machmate_csrftoken");
   const navigate = useNavigate();
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  }
+
 
   useEffect(() => {
     axios.get(API_HOST + "/csrf/", { withCredentials: true });
@@ -135,7 +143,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
   const handleLogout = async () => {
     try {
-      const csrftoken = Cookies.get("csrftoken");
+      const csrftoken = getCookie("machmate_csrftoken");
       await axios.post(
         API_HOST + "/auth/logout/",
         {},

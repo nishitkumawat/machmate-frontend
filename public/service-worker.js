@@ -4,6 +4,7 @@ const urlsToCache = [
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
   "/favicon.png",
+  "/assets/", // optional: cache static assets folder
 ];
 
 // Install event: cache core assets
@@ -37,13 +38,32 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch event: try network first, fallback to cache, then fallback to index.html
+// Fetch event: network first for API, cache static assets only
 self.addEventListener("fetch", (event) => {
+  const requestUrl = new URL(event.request.url);
+
+  // 🚫 Don't cache API requests
+  if (requestUrl.origin === "https://machmate-backend.onrender.com") {
+    event.respondWith(
+      fetch(event.request, { credentials: "include" }).catch(() => {
+        return new Response(JSON.stringify({ error: "API not reachable" }), {
+          headers: { "Content-Type": "application/json" },
+        });
+      })
+    );
+    return; // exit early
+  }
+
+  // Static assets & SPA fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Optionally cache successful GET requests
-        if (event.request.method === "GET") {
+        // Cache GET requests for static assets only
+        if (
+          event.request.method === "GET" &&
+          !event.request.url.includes("/api/") &&
+          !event.request.url.includes("/auth/")
+        ) {
           const cloned = response.clone();
           caches
             .open(CACHE_NAME)
@@ -53,13 +73,14 @@ self.addEventListener("fetch", (event) => {
       })
       .catch(async () => {
         const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+        if (cachedResponse) return cachedResponse;
+
         // Offline SPA fallback
         if (event.request.mode === "navigate") {
           return caches.match("/index.html");
         }
+
+        return new Response("Offline content not available", { status: 503 });
       })
   );
 });

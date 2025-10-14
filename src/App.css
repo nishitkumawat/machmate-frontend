@@ -1,1 +1,7 @@
 @import "tailwindcss";
+button,
+input,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}

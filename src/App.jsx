@@ -24,21 +24,29 @@ import MakerProfile from "./Components/MakerProfile";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
   const API_HOST = import.meta.env.VITE_API_HOST;
 
   useEffect(() => {
     const checkAuthStatus = async () => {
+      let shouldUseStoredAuth = false;
+
       try {
-        const storedUser = localStorage.getItem("user");
-        let shouldUseStoredAuth = false;
+        const storedUser = (() => {
+          try {
+            return localStorage.getItem("user");
+          } catch (err) {
+            console.warn("localStorage unavailable", err);
+            return null;
+          }
+        })();
 
         if (storedUser) {
           const user = JSON.parse(storedUser);
           shouldUseStoredAuth = user.rememberMe;
         }
 
-        const res = await axios.get(API_HOST + "/auth/me/", {
+        const res = await axios.get(`${API_HOST}/auth/me/`, {
           withCredentials: true,
         });
 
@@ -46,28 +54,35 @@ function App() {
           setIsAuthenticated(true);
           setUserRole(res.data.role);
 
-          localStorage.setItem(
-            "user",
-            JSON.stringify({
-              isAuthenticated: true,
-              role: res.data.role,
-              rememberMe: shouldUseStoredAuth,
-            })
-          );
+          try {
+            localStorage.setItem(
+              "user",
+              JSON.stringify({
+                isAuthenticated: true,
+                role: res.data.role,
+                rememberMe: shouldUseStoredAuth,
+              })
+            );
+          } catch (err) {
+            console.warn("Failed to save user info", err);
+          }
         } else {
           setIsAuthenticated(false);
           setUserRole(null);
-          localStorage.removeItem("user");
+          try {
+            localStorage.removeItem("user");
+          } catch {}
         }
       } catch (err) {
         console.error("Auth check failed", err);
         setIsAuthenticated(false);
         setUserRole(null);
-        localStorage.removeItem("user");
+        try {
+          localStorage.removeItem("user");
+        } catch {}
       } finally {
         setIsLoading(false);
 
-        // Remove the HTML preloader here
         const preloader = document.getElementById("preloader");
         if (preloader) preloader.remove();
       }
@@ -78,26 +93,26 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white">
-        {/* Rotating gear icon */}
+      <div
+        aria-busy="true"
+        className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white"
+      >
         <Settings
           size={60}
           color="#1e90ff"
           style={{ animation: "spin 3s linear infinite" }}
         />
 
-        {/* Loading text */}
         <p className="mt-4 text-blue-600 text-lg font-medium">
           Getting Your Site Ready...
         </p>
 
-        {/* Inline keyframes for spin */}
         <style>{`
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `}</style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }

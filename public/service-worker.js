@@ -1,34 +1,38 @@
-const CACHE_NAME = "machmate-cache-v2"; // bump version when updating
+const CACHE_NAME = "machmate-cache-v3"; // update version on new deploy
 const urlsToCache = [
   "/index.html",
+  "/favicon.png",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
-  "/favicon.png",
-  "/assets/", // optional: cache static assets folder
+  "/assets/", // optional: static assets folder
 ];
 
+// ----------------------------
 // Install event: cache core assets
+// ----------------------------
 self.addEventListener("install", (event) => {
-  console.log("Service Worker installing...");
+  console.log("[SW] Installing Service Worker...");
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache).catch((err) => {
-        console.warn("Failed to pre-cache some assets:", err);
+        console.warn("[SW] Failed to pre-cache some assets:", err);
       });
     })
   );
   self.skipWaiting();
 });
 
+// ----------------------------
 // Activate event: clean old caches
+// ----------------------------
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker activating...");
+  console.log("[SW] Activating Service Worker...");
   event.waitUntil(
     caches.keys().then((cacheNames) =>
       Promise.all(
         cacheNames.map((name) => {
           if (name !== CACHE_NAME) {
-            console.log("Deleting old cache:", name);
+            console.log("[SW] Deleting old cache:", name);
             return caches.delete(name);
           }
         })
@@ -38,12 +42,18 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch event: network first for API, cache static assets only
+// ----------------------------
+// Fetch event: network-first for API/auth, cache static assets
+// ----------------------------
 self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // 🚫 Don't cache API requests
-  if (requestUrl.origin === "https://machmate-backend.onrender.com") {
+  // --- 1️⃣ Network-only for API/auth requests ---
+  if (
+    requestUrl.origin === "https://machmate-backend.onrender.com" &&
+    (requestUrl.pathname.startsWith("/auth/") ||
+      requestUrl.pathname.startsWith("/api/"))
+  ) {
     event.respondWith(
       fetch(event.request, { credentials: "include" }).catch(() => {
         return new Response(JSON.stringify({ error: "API not reachable" }), {
@@ -54,7 +64,7 @@ self.addEventListener("fetch", (event) => {
     return; // exit early
   }
 
-  // Static assets & SPA fallback
+  // --- 2️⃣ Static assets & SPA navigation fallback ---
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -75,7 +85,7 @@ self.addEventListener("fetch", (event) => {
         const cachedResponse = await caches.match(event.request);
         if (cachedResponse) return cachedResponse;
 
-        // Offline SPA fallback
+        // SPA fallback for navigation requests
         if (event.request.mode === "navigate") {
           return caches.match("/index.html");
         }

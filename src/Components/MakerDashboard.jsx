@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+import machmateLogo from "../assets/logo-dark.png";
 import {
   ChevronDown,
   Calendar,
@@ -701,20 +702,12 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
           <div className="flex flex-col h-full">
             {/* Logo */}
             <div className="flex items-center p-6 border-b border-gray-200">
-              <div className="bg-blue-600 h-8 w-8 rounded-md flex items-center justify-center mr-3">
-                <svg
-                  className="h-5 w-5 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 0119 9.414V19a2 2 0 01-2 2z"
-                  />
-                </svg>
+              <div className=" h-8 w-8 rounded-md flex items-center justify-center ">
+                <img
+                  src={machmateLogo}
+                  alt="MachMate Logo"
+                  className="h-10 w-10 mr-2 object-contain"
+                />
               </div>
               {sidebarOpen && (
                 <span className="text-xl font-bold text-blue-600">

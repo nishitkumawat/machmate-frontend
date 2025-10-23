@@ -11,6 +11,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const [userRole, setLocalUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState(null);
+  const [selectedPeriods, setSelectedPeriods] = useState({});
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
@@ -19,7 +20,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     {
       id: "basic",
       name: "Basic",
-      price: 499,
       features: [
         "10 quotations upload per month",
         "Standard listing in search results",
@@ -30,7 +30,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     {
       id: "pro",
       name: "Pro",
-      price: 1499,
       features: [
         "100 quotations upload per month",
         "Priority visibility in search",
@@ -42,7 +41,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     {
       id: "premium",
       name: "Premium",
-      price: 3499,
       features: [
         "Unlimited quotations upload",
         "Highlighted quotations",
@@ -54,9 +52,44 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     },
   ];
 
+  const billingPeriods = [
+    { id: "1_month", name: "1 Month", months: 1 },
+    { id: "3_months", name: "3 Months", months: 3, discount: "Save 5%" },
+    { id: "6_months", name: "6 Months", months: 6, discount: "Save 10%" },
+    { id: "12_months", name: "12 Months", months: 12, discount: "Save 15%" },
+  ];
+
+  const prices = {
+    basic: {
+      "1_month": 49900,
+      "3_months": 142000,
+      "6_months": 264000,
+      "12_months": 479000,
+    },
+    pro: {
+      "1_month": 149900,
+      "3_months": 427000,
+      "6_months": 790000,
+      "12_months": 1439000,
+    },
+    premium: {
+      "1_month": 349900,
+      "3_months": 995000,
+      "6_months": 1848000,
+      "12_months": 3359000,
+    },
+  };
+
   useEffect(() => {
     fetchUserSubscription();
     getUserRole();
+
+    // Initialize default selected periods
+    const defaultPeriods = {};
+    subscriptionPlans.forEach((plan) => {
+      defaultPeriods[plan.id] = "1_month";
+    });
+    setSelectedPeriods(defaultPeriods);
   }, []);
 
   const getUserRole = async () => {
@@ -88,8 +121,38 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     }
   };
 
+  const handlePeriodChange = (planId, periodId) => {
+    setSelectedPeriods((prev) => ({
+      ...prev,
+      [planId]: periodId,
+    }));
+  };
+
+  const calculateMonthlyPrice = (planId, periodId) => {
+    const price = prices[planId][periodId];
+    const months = billingPeriods.find((p) => p.id === periodId).months;
+    return Math.round(price / months);
+  };
+
+  const calculateSavings = (planId, periodId) => {
+    if (periodId === "1_month") return 0;
+    const monthlyPrice = calculateMonthlyPrice(planId, periodId);
+    const oneMonthPrice = prices[planId]["1_month"];
+    const totalWithoutDiscount =
+      oneMonthPrice * billingPeriods.find((p) => p.id === periodId).months;
+    const actualTotal = prices[planId][periodId];
+    return totalWithoutDiscount - actualTotal;
+  };
+
   const handleSubscription = async (planId) => {
     if (isLoading) return;
+
+    const periodId = selectedPeriods[planId];
+    if (!periodId) {
+      alert("Please select a billing period");
+      return;
+    }
+
     setLoadingPlan(planId);
     setIsLoading(true);
 
@@ -97,7 +160,10 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       // 1️⃣ Create payment order on backend
       const response = await axios.post(
         API_HOST + "/subscriptions/create-payment/",
-        { plan: planId },
+        {
+          plan: planId,
+          period: periodId,
+        },
         { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
       );
 
@@ -133,13 +199,14 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       }
 
       // 3️⃣ Initialize Razorpay checkout
+      const periodName = billingPeriods.find((p) => p.id === periodId).name;
       const options = {
         key: "rzp_live_RNKzs8FQpd6VDd", // Your Razorpay key
-        amount: amount, // amount in paise
+        amount: amount,
         currency: currency,
         name: "MachMate",
-        description: `${planId} Plan Subscription`,
-        order_id: order_id, // mandatory
+        description: `${planId} Plan - ${periodName}`,
+        order_id: order_id,
         handler: async (razorpayResponse) => {
           try {
             // Verify payment on backend
@@ -150,6 +217,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                 razorpay_payment_id: razorpayResponse.razorpay_payment_id,
                 razorpay_signature: razorpayResponse.razorpay_signature,
                 plan: planId,
+                period: periodId,
               },
               { withCredentials: true, headers: { "X-CSRFToken": csrftoken } }
             );
@@ -244,26 +312,9 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     else navigate("/dashboard");
   };
 
-  const MachMateLogo = () => (
-    <svg
-      className="h-5 w-5 text-white"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13 10V3L4 14h7v7l9-11h-7z"
-      />
-    </svg>
-  );
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
       {/* Navigation */}
-      {/* Navigation - Updated */}
       <nav className="bg-white shadow-md fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -328,8 +379,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Select the subscription plan that works best for your manufacturing
-            needs. All plans include our core features with varying levels of
-            capacity and support.
+            needs. Save more with longer commitments!
           </p>
         </div>
 
@@ -366,75 +416,130 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
 
         {/* Subscription Plans */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {subscriptionPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`bg-white rounded-xl shadow-md p-6 relative ${
-                plan.recommended
-                  ? "ring-2 ring-blue-500 transform scale-105"
-                  : ""
-              }`}
-            >
-              {plan.recommended && (
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Most Popular
-                </div>
-              )}
+          {subscriptionPlans.map((plan) => {
+            const selectedPeriod = selectedPeriods[plan.id];
+            const price = prices[plan.id][selectedPeriod];
+            const months = billingPeriods.find(
+              (p) => p.id === selectedPeriod
+            ).months;
+            const monthlyPrice = calculateMonthlyPrice(plan.id, selectedPeriod);
+            const savings = calculateSavings(plan.id, selectedPeriod);
 
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {plan.name}
-              </h3>
-
-              <div className="mb-4">
-                <span className="text-3xl font-bold text-gray-900">
-                  ₹{plan.price}
-                </span>
-                <span className="text-gray-600">/month</span>
-              </div>
-
-              <ul className="mb-6 space-y-2">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <svg
-                      className="h-5 w-5 text-green-500 mr-2 mt-0.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-gray-600">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => handleSubscription(plan.id)}
-                disabled={
-                  isLoading ||
-                  (userSubscription && userSubscription.plan === plan.id)
-                }
-                className={`w-full py-3 font-medium rounded-md transition duration-300 ${
-                  userSubscription && userSubscription.plan === plan.id
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : plan.recommended
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+            return (
+              <div
+                key={plan.id}
+                className={`bg-white rounded-xl shadow-md p-6 relative ${
+                  plan.recommended
+                    ? "ring-2 ring-blue-500 transform scale-105"
+                    : ""
                 }`}
               >
-                {isLoading && loadingPlan === plan.id
-                  ? "Processing..."
-                  : userSubscription && userSubscription.plan === plan.id
-                  ? "Current Plan"
-                  : "Subscribe Now"}
-              </button>
-            </div>
-          ))}
+                {plan.recommended && (
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    Most Popular
+                  </div>
+                )}
+
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {plan.name}
+                </h3>
+
+                {/* Billing Period Selector */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Billing Period
+                  </label>
+                  <select
+                    value={selectedPeriod}
+                    onChange={(e) =>
+                      handlePeriodChange(plan.id, e.target.value)
+                    }
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {billingPeriods.map((period) => (
+                      <option key={period.id} value={period.id}>
+                        {period.name}{" "}
+                        {period.discount && `- ${period.discount}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Price Display */}
+                <div className="mb-4">
+                  <div className="flex items-baseline mb-1">
+                    <span className="text-3xl font-bold text-gray-900">
+                      ₹{(price / 100).toLocaleString()}
+                    </span>
+                    <span className="text-gray-600 ml-2">
+                      for {months} month{months > 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {savings > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-500 line-through">
+                        ₹
+                        {(
+                          (prices[plan.id]["1_month"] * months) /
+                          100
+                        ).toLocaleString()}
+                      </span>
+                      <span className="text-sm text-green-600 font-medium">
+                        Save ₹{(savings / 100).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="text-sm text-gray-600">
+                    ₹{(monthlyPrice / 100).toLocaleString()} per month
+                  </div>
+                </div>
+
+                <ul className="mb-6 space-y-2">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-start">
+                      <svg
+                        className="h-5 w-5 text-green-500 mr-2 mt-0.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-600">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  onClick={() => handleSubscription(plan.id)}
+                  disabled={
+                    isLoading ||
+                    (userSubscription && userSubscription.plan === plan.id)
+                  }
+                  className={`w-full py-3 font-medium rounded-md transition duration-300 ${
+                    userSubscription && userSubscription.plan === plan.id
+                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      : plan.recommended
+                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                  }`}
+                >
+                  {isLoading && loadingPlan === plan.id
+                    ? "Processing..."
+                    : userSubscription && userSubscription.plan === plan.id
+                    ? "Current Plan"
+                    : "Subscribe Now"}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mt-12 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
@@ -452,6 +557,9 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
             </li>
             <li>Plan refunds are not available after payment processing.</li>
             <li>Unused quotations do not roll over to the next month.</li>
+            <li>
+              Longer subscriptions offer better value with discounted rates.
+            </li>
           </ul>
         </div>
       </div>

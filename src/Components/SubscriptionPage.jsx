@@ -144,10 +144,15 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
     return totalWithoutDiscount - actualTotal;
   };
 
+  // Safe getter for selected period with fallback
+  const getSelectedPeriod = (planId) => {
+    return selectedPeriods[planId] || "1_month";
+  };
+
   const handleSubscription = async (planId) => {
     if (isLoading) return;
 
-    const periodId = selectedPeriods[planId];
+    const periodId = getSelectedPeriod(planId);
     if (!periodId) {
       alert("Please select a billing period");
       return;
@@ -199,7 +204,8 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       }
 
       // 3️⃣ Initialize Razorpay checkout
-      const periodName = billingPeriods.find((p) => p.id === periodId).name;
+      const period = billingPeriods.find((p) => p.id === periodId);
+      const periodName = period ? period.name : `${periodId.replace("_", " ")}`;
       const options = {
         key: "rzp_live_RNKzs8FQpd6VDd", // Your Razorpay key
         amount: amount,
@@ -417,11 +423,10 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
         {/* Subscription Plans */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {subscriptionPlans.map((plan) => {
-            const selectedPeriod = selectedPeriods[plan.id];
+            const selectedPeriod = getSelectedPeriod(plan.id);
             const price = prices[plan.id][selectedPeriod];
-            const months = billingPeriods.find(
-              (p) => p.id === selectedPeriod
-            ).months;
+            const period = billingPeriods.find((p) => p.id === selectedPeriod);
+            const months = period ? period.months : 1;
             const monthlyPrice = calculateMonthlyPrice(plan.id, selectedPeriod);
             const savings = calculateSavings(plan.id, selectedPeriod);
 

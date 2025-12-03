@@ -4,6 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const API_HOST = import.meta.env.VITE_API_HOST;
+const RZP_KEY = import.meta.env.RZP_KEY;
 
 function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
   const [userSubscription, setUserSubscription] = useState(null);
@@ -207,7 +208,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
       const period = billingPeriods.find((p) => p.id === periodId);
       const periodName = period ? period.name : `${periodId.replace("_", " ")}`;
       const options = {
-        key: "rzp_live_RNKzs8FQpd6VDd", // Your Razorpay key
+        key: RZP_KEY, // Your Razorpay key
         amount: amount,
         currency: currency,
         name: "MachMate",

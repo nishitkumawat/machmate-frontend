@@ -237,13 +237,13 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
         }
       );
 
-      if (response.status === 201) {
+      if (response.status === 200 || response.status === 201) {
         setShowCompanyForm(false);
         setUserState(companyFormData.state);
       }
     } catch (error) {
       console.error("Failed to save company details", error);
-      alert("Failed to save company details. Please try again.");
+      // alert("Failed to save company details. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

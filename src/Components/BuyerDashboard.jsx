@@ -47,6 +47,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [error, setError] = useState("");
+  const [acceptingQuotationId, setAcceptingQuotationId] = useState(null);
 
   const csrftoken = Cookies.get("csrftoken");
   const navigate = useNavigate();
@@ -211,6 +212,7 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
   const acceptQuotation = async (quotationId) => {
     try {
       setError("");
+      setAcceptingQuotationId(quotationId);
       await axios.post(
         API_HOST + `/buyer/quotations/${quotationId}/accept/`,
         {},
@@ -230,6 +232,8 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
         return;
       }
       alert("Failed to accept quotation. Please try again.");
+    } finally {
+      setAcceptingQuotationId(null);
     }
   };
 
@@ -1579,9 +1583,18 @@ function BuyerDashboard({ setIsAuthenticated, setUserRole }) {
                             onClick={() =>
                               acceptQuotation(quotation.quotation_id)
                             }
-                            className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300 shadow-sm hover:shadow-md"
+                            disabled={
+                              acceptingQuotationId === quotation.quotation_id
+                            }
+                            className={`px-6 py-2 font-medium rounded-lg transition duration-300 shadow-sm ${
+                              acceptingQuotationId === quotation.quotation_id
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 text-white hover:bg-green-700 hover:shadow-md"
+                            }`}
                           >
-                            Accept Quotation
+                            {acceptingQuotationId === quotation.quotation_id
+                              ? "Accepting..."
+                              : "Accept Quotation"}
                           </button>
                         </div>
                       </div>

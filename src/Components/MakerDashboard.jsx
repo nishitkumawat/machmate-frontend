@@ -51,6 +51,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
     website: "",
   });
   const [availableCities, setAvailableCities] = useState([]);
+  const [companyExists, setCompanyExists] = useState(false);
 
   const navigate = useNavigate();
 
@@ -134,6 +135,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
       if (response.data && response.data.company_name) {
         setShowCompanyForm(false);
+        setCompanyExists(true);
         setUserState(response.data.state);
         // Set existing company data
         setCompanyFormData({
@@ -148,6 +150,7 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
         });
       } else {
         setShowCompanyForm(true);
+        setCompanyExists(false);
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -228,26 +231,33 @@ function MakerDashboard({ setIsAuthenticated, setUserRole }) {
 
     try {
       const csrftoken = getCookie("machmate_csrftoken");
-      const response = await axios.post(
-        API_HOST + "/maker/company-details/",
-        companyFormData,
-        {
-          withCredentials: true,
-          headers: { "X-CSRFToken": csrftoken },
-        }
-      );
+
+      // Decide whether to POST or PUT
+      const method = companyExists ? "put" : "post";
+
+      const response = await axios({
+        method,
+        url: API_HOST + "/maker/company-details/",
+        data: {
+          ...companyFormData,
+          year_established: Number(companyFormData.year_established), // ensure int
+        },
+        withCredentials: true,
+        headers: { "X-CSRFToken": csrftoken },
+      });
 
       if (response.status === 200 || response.status === 201) {
         setShowCompanyForm(false);
         setUserState(companyFormData.state);
+        setCompanyExists(true);   // mark profile as created
       }
     } catch (error) {
       console.error("Failed to save company details", error);
-      // alert("Failed to save company details. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

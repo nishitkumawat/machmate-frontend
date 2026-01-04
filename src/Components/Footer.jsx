@@ -17,8 +17,8 @@ function Footer() {
             MachMate
           </h3>
           <p className="text-gray-400">
-            Connecting buyers and machine makers for custom
-            manufacturing projects.
+            Connecting buyers and machine makers for custom manufacturing
+            projects.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ function Footer() {
         <div>
           <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
           <p className="text-gray-400 mb-2">machmate.contact@gmail.com</p>
-          <p className="text-gray-400 mb-4">+91 9104513411, +91 99747 76076</p>
+          <p className="text-gray-400 mb-4">+91 99744 86076</p>
           {/* <div className="flex space-x-4">
             <a
               href="#"
@@ -124,7 +124,7 @@ function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-        <p>&copy; 2025 MachMate. All rights reserved.</p>
+        <p>&copy; 2026 MachMate. All rights reserved.</p>
       </div>
     </footer>
   );

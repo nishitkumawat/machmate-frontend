@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
   return (
     <LegalPageLayout title="Privacy Policy">
       <p className="text-gray-600 mb-6 text-center">
-        Effective Date: 09/09/2026
+        Effective Date: 09/09/2027
         <br />
         Last Updated: 09/09/2025
       </p>

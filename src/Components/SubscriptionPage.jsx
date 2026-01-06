@@ -400,10 +400,13 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                 <p className="text-lg font-medium text-blue-600 capitalize">
                   {userSubscription.plan} Plan
                 </p>
-                <p className="text-gray-600">
-                  {userSubscription.remaining_credits} quotations remaining this
-                  month
-                </p>
+                {userSubscription?.plan !== "premium" && (
+                  <p className="text-gray-600">
+                    {userSubscription?.remaining_credits} quotations remaining
+                    this month
+                  </p>
+                )}
+
                 <p className="text-gray-600">
                   Plan valid until{" "}
                   {new Date(userSubscription.end_date).toLocaleDateString(
@@ -411,7 +414,6 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                   )}
                 </p>
               </div>
-
             </div>
           </div>
         )}

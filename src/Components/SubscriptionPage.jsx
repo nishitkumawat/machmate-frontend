@@ -411,12 +411,7 @@ function SubscriptionPage({ setIsAuthenticated, setUserRole }) {
                   )}
                 </p>
               </div>
-              <button
-                onClick={() => setShowCancelDialog(true)}
-                className="mt-4 md:mt-0 px-4 py-2 border border-red-600 text-red-600 font-medium rounded-md hover:bg-red-50 transition duration-300"
-              >
-                Cancel Subscription
-              </button>
+
             </div>
           </div>
         )}

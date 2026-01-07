@@ -547,6 +547,56 @@ function ProjectDetail({ setIsAuthenticated, setUserRole }) {
             </div>
           </div>
 
+          {/* Work Seeker Details Section */}
+          <div className="px-8 pb-8 pt-6 bg-white border-b border-gray-200">
+            {project.work_seeker_details ? (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Now</h3>
+                <div className="space-y-3 text-gray-800">
+                  <div>
+                     <span className="font-semibold block text-gray-500 text-sm mb-1">Contact:</span>
+                     <span className="text-lg">{project.work_seeker_details.display_name}</span>
+                  </div>
+
+                  <div>
+                     <span className="font-semibold block text-gray-500 text-sm mb-1">Phone:</span>
+                     <span className="text-lg font-medium">{project.work_seeker_details.phone_number}</span>
+                  </div>
+
+                  {project.work_seeker_details.company_name && (
+                    <div>
+                      <span className="font-semibold block text-gray-500 text-sm mb-1">Company:</span>
+                      <span>{project.work_seeker_details.company_name}</span>
+                    </div>
+                  )}
+
+                  {(project.work_seeker_details.company_address || project.work_seeker_details.company_city) && (
+                    <div>
+                       <span className="font-semibold block text-gray-500 text-sm mb-1">Address:</span>
+                       <span>
+                        {[
+                          project.work_seeker_details.company_address,
+                          project.work_seeker_details.company_city,
+                          project.work_seeker_details.company_state
+                        ].filter(Boolean).join(", ")}
+                       </span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <div className="text-center py-4 bg-gray-50 rounded-lg">
+                 <p className="text-gray-500 italic text-sm">
+                    <span className="font-semibold text-gray-700">Unlock Premium</span> to view contact details.
+                 </p>
+              </div>
+            )}
+          </div>
+
           {/* Project Description */}
           <div className="p-8 border-b border-gray-200">
             <motion.div
